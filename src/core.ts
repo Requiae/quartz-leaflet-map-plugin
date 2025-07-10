@@ -89,28 +89,34 @@ function buildMarkerData(file: VFile): void {
   const { slug, frontmatter } = file.data;
   const markerData = frontmatter?.marker;
 
-  if (
-    !slug ||
-    !frontmatter ||
-    !frontmatter?.title ||
-    !isFrontmatterMarkerData(markerData)
-  ) {
+  if (!slug || !frontmatter || !frontmatter?.title || !markerData) {
     return;
   }
 
-  const mapName = markerData.mapName.toLowerCase().trim();
-  if (LEAFLET_MAP_PLUGIN_DATA.markerMap[mapName] === undefined) {
-    LEAFLET_MAP_PLUGIN_DATA.markerMap[mapName] = [];
+  let confirmedMarkerData: FrontmatterMarkerData[];
+  if (Array.isArray(markerData) && markerData.every((value) => isFrontmatterMarkerData(value))) {
+    confirmedMarkerData = markerData;
+  } else if (isFrontmatterMarkerData(markerData)) {
+    confirmedMarkerData = [markerData];
+  } else {
+    return;
   }
 
-  LEAFLET_MAP_PLUGIN_DATA.markerMap[mapName].push({
-    name: frontmatter.title,
-    link: slug,
-    position: { x: parseInt(markerData.x), y: parseInt(markerData.y) },
-    icon: markerData.icon,
-    colour: getColourValue(markerData.colour),
-    minZoom: markerData.minZoom ? parseInt(markerData.minZoom) : -1,
-  });
+  for (const marker of confirmedMarkerData) {
+    const mapName = marker.mapName.toLowerCase().trim();
+    if (LEAFLET_MAP_PLUGIN_DATA.markerMap[mapName] === undefined) {
+      LEAFLET_MAP_PLUGIN_DATA.markerMap[mapName] = [];
+    }
+
+    LEAFLET_MAP_PLUGIN_DATA.markerMap[mapName].push({
+      name: frontmatter.title,
+      link: slug,
+      position: { x: parseInt(marker.x), y: parseInt(marker.y) },
+      icon: marker.icon,
+      colour: getColourValue(marker.colour),
+      minZoom: marker.minZoom ? parseInt(marker.minZoom) : -1,
+    });
+  }
 }
 
 function buildMarkerObject(marker: Marker, distance: number): Element {
@@ -133,9 +139,7 @@ function buildMarkerObject(marker: Marker, distance: number): Element {
 
 function collectMapMetadata(node: any): MapMetadata {
   // Parse data stored in callout meta data
-  const calloutMetadata = (
-    (node.properties?.dataCalloutMetadata ?? "") as string
-  )
+  const calloutMetadata = ((node.properties?.dataCalloutMetadata ?? "") as string)
     .replaceAll(/(\\n)| /g, "")
     .split("-");
 
@@ -189,11 +193,7 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
       () => {
         return (tree: Root, file: VFile) => {
           visit(tree, { tagName: "blockquote" }, (node: any, index, parent) => {
-            if (
-              node.properties?.dataCallout !== "map" ||
-              !parent ||
-              index === undefined
-            ) {
+            if (node.properties?.dataCallout !== "map" || !parent || index === undefined) {
               return;
             }
 
@@ -202,8 +202,7 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
             const markers = LEAFLET_MAP_PLUGIN_DATA.markerMap[mapName] ?? [];
 
             // Fix slug based navigation based on distance to root
-            const distanceToRoot =
-              (file.data.filePath ?? "/").split("/").length - 2; // Deduct root directory and current page from distance
+            const distanceToRoot = (file.data.filePath ?? "/").split("/").length - 2; // Deduct root directory and current page from distance
 
             // Build the new leaflet element
             const leafletContainer: Element = {
@@ -211,9 +210,7 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
               tagName: "div",
               properties: {},
               children: [
-                ...markers.map((marker) =>
-                  buildMarkerObject(marker, distanceToRoot)
-                ),
+                ...markers.map((marker) => buildMarkerObject(marker, distanceToRoot)),
                 {
                   type: "element",
                   tagName: "div",

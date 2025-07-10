@@ -37,30 +37,19 @@ function getMarkerOnClick(url: string): L.LeafletMouseEventHandlerFn {
 }
 
 function addMarker(markerData: MarkerDataSet, mapItem: L.Map) {
-  function addMarkerWhenZoom(
-    markerItem: L.Marker,
-    mapItem: L.Map,
-    markerZoom: number
-  ) {
-    mapItem.getZoom() >= markerZoom
-      ? markerItem.addTo(mapItem)
-      : markerItem.remove();
+  function addMarkerWhenZoom(markerItem: L.Marker, mapItem: L.Map, markerZoom: number) {
+    mapItem.getZoom() >= markerZoom ? markerItem.addTo(mapItem) : markerItem.remove();
   }
 
   const options = { icon: buildIcon(markerData.icon, markerData.colour) };
 
   const markerZoom = parseInt(markerData.minZoom);
-  const markerItem = L.marker(
-    [parseInt(markerData.posY), parseInt(markerData.posX)],
-    options
-  )
+  const markerItem = L.marker([parseInt(markerData.posY), parseInt(markerData.posX)], options)
     .bindTooltip(markerData.name)
     .on("click", getMarkerOnClick(markerData.link));
 
   addMarkerWhenZoom(markerItem, mapItem, markerZoom);
-  mapItem.on("zoomend", () =>
-    addMarkerWhenZoom(markerItem, mapItem, markerZoom)
-  );
+  mapItem.on("zoomend", () => addMarkerWhenZoom(markerItem, mapItem, markerZoom));
 }
 
 function isMarkerDataSet(dataset: any): dataset is MarkerDataSet {
@@ -107,7 +96,7 @@ async function getMeta(url: string): Promise<HTMLImageElement> {
 
 async function initialiseMap(
   mapElement: HTMLElement,
-  markers: MarkerDataSet[]
+  markers: MarkerDataSet[],
 ): Promise<L.Map | undefined> {
   const dataset = mapElement.dataset;
   if (!isMapDataSet(dataset)) {
@@ -116,9 +105,7 @@ async function initialiseMap(
 
   const image = await getMeta(dataset.src);
 
-  mapElement.style.aspectRatio = (
-    image.naturalWidth / image.naturalHeight
-  ).toString();
+  mapElement.style.aspectRatio = (image.naturalWidth / image.naturalHeight).toString();
 
   const bounds: L.LatLngBoundsExpression = [
     [0, 0],
@@ -155,8 +142,7 @@ document.addEventListener("nav", async () => {
     return;
   }
 
-  const markers: NodeListOf<HTMLElement> =
-    document.querySelectorAll("div.leaflet-marker");
+  const markers: NodeListOf<HTMLElement> = document.querySelectorAll("div.leaflet-marker");
   const markerData = getMarkerData(markers);
 
   const mapItem = await initialiseMap(map, markerData);
