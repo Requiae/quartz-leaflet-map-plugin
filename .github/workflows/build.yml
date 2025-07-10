@@ -1,0 +1,31 @@
+name: Build
+
+on: push
+
+jobs:
+  format-code:
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      # Prepare to build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Dependencies
+        run: npm install
+
+      # Build the final file
+      - name: Build plugin
+        run: npm run build
+
+      # Commit all changed files back to the repository
+      - uses: stefanzweifel/git-auto-commit-action@v6
