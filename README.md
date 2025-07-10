@@ -55,18 +55,18 @@ You can just click the copy icon to receive the icon name, `mdi:anvil` in this c
 This plugin uses 10 predefined colours, but also allows for custom colours to be used.
 
 The predefined colours are:
-|Colour|Hex|Preview|
-|------|---|---|
-|green| #039c4b |<span style="color:#039c4b">&#9632;</span>|
-|lime| #66d313 |<span style="color:#66d313">&#9632;</span>|
-|yellow| #e2c505 |<span style="color:#e2c505">&#9632;</span>|
-|pink| #ff0984 |<span style="color:#ff0984">&#9632;</span>|
-|blue| #21409a |<span style="color:#21409a">&#9632;</span>|
-|lightblue| #04adff |<span style="color:#04adff">&#9632;</span>|
-|brown| #e48873 |<span style="color:#e48873">&#9632;</span>|
-|orange| #f16623 |<span style="color:#f16623">&#9632;</span>|
-|red| #f44546 |<span style="color:#f44546">&#9632;</span>|
-|purple| #7623a5 |<span style="color:#7623a5">&#9632;</span>|
+|Colour|Hex|
+|------|---|
+|green| #039c4b |
+|lime| #66d313 |
+|yellow| #e2c505 |
+|pink| #ff0984 |
+|blue| #21409a |
+|lightblue| #04adff |
+|brown| #e48873 |
+|orange| #f16623 |
+|red| #f44546 |
+|purple| #7623a5 |
 
 The custom colours have to be 3- or 6-digit hex colours, however due to the frontmatter being written in yaml we'll have to omit the `#`.
 
