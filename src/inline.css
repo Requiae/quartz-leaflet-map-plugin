@@ -1,0 +1,37 @@
+#leaflet-map {
+  width: 100%;
+  margin: 0;
+  z-index: 0;
+  background-color: rgba(80, 120, 180, 0.1);
+
+  .leaflet-image-layer {
+    margin: 0 !important;
+  }
+}
+
+/* to align and colour icon */
+.custom-div-icon .icon {
+  position: absolute;
+  width: 32px;
+  height: 19px;
+  font-size: 19px;
+  top: 8px;
+  left: 0px;
+  z-index: inherit;
+  margin: 0px auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ebebec;
+}
+
+/* to align marker */
+.custom-div-icon .marker {
+  position: absolute;
+  width: 32px;
+  height: 48px;
+  margin: 0px auto;
+  z-index: inherit;
+}
