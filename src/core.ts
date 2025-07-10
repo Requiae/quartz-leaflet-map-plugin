@@ -173,8 +173,8 @@ function collectMapMetadata(node: any): MapMetadata {
   return { minZoom, maxZoom, name, src };
 }
 
-export const Leaflet: QuartzTransformerPlugin = () => ({
-  name: "Leaflet",
+export const LeafletMap: QuartzTransformerPlugin = () => ({
+  name: "LeafletMapPlugin",
   markdownPlugins() {
     return [
       () => {

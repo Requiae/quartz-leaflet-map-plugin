@@ -43,7 +43,7 @@ async function buildSource(): Promise<void> {
     .replace("INLINE_CSS_SOURCE", compiledCss)
     .replace("INLINE_JS_SOURCE", compiledJS);
 
-  await writeFile("leaflet-map-plugin.ts", buildString, "utf8");
+  await writeFile("leafletMapPlugin.ts", buildString, "utf8");
 }
 
 await buildSource();
