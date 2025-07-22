@@ -210,17 +210,16 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
               tagName: "div",
               properties: {},
               children: [
-                ...markers.map((marker) => buildMarkerObject(marker, distanceToRoot)),
                 {
                   type: "element",
                   tagName: "div",
                   properties: {
-                    id: "leaflet-map",
+                    class: ["leaflet-map"],
                     "data-src": mapMetaData.src,
                     "data-min-zoom": mapMetaData.minZoom,
                     "data-max-zoom": mapMetaData.maxZoom,
                   },
-                  children: [],
+                  children: markers.map((marker) => buildMarkerObject(marker, distanceToRoot)),
                 },
               ],
             };

@@ -85,6 +85,16 @@ function getMarkerData(markers: NodeListOf<HTMLElement>): MarkerDataSet[] {
   return data;
 }
 
+function getMapData(maps: NodeListOf<HTMLElement>): MapDataSet[] {
+  const data = [];
+  for (const map of maps) {
+    if (isMapDataSet(map.dataset)) {
+      data.push(map.dataset);
+    }
+  }
+  return data;
+}
+
 async function getMeta(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image();
@@ -137,14 +147,12 @@ function cleanupMap(mapItem: L.Map | undefined) {
 }
 
 document.addEventListener("nav", async () => {
-  const map = document.getElementById("leaflet-map");
-  if (!map) {
-    return;
+  const maps: NodeListOf<HTMLElement> = document.querySelectorAll("div.leaflet-map");
+  for (const map of maps) {
+    const markers: NodeListOf<HTMLElement> = map.querySelectorAll("div.leaflet-marker");
+    const markerData = getMarkerData(markers);
+
+    const mapItem = await initialiseMap(map, markerData);
+    window.addCleanup(() => cleanupMap(mapItem));
   }
-
-  const markers: NodeListOf<HTMLElement> = document.querySelectorAll("div.leaflet-marker");
-  const markerData = getMarkerData(markers);
-
-  const mapItem = await initialiseMap(map, markerData);
-  window.addCleanup(() => cleanupMap(mapItem));
 });

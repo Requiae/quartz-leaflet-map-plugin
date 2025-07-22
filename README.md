@@ -29,11 +29,11 @@ Adding a marker to a map is done by adding the following block of code to the no
 
 ```yaml
 marker:
-  mapName: MAP_NAME
-  x: 100
-  y: 55
-  icon: ICON
-  colour: COLOUR
+  - mapName: MAP_NAME
+    x: 100
+    y: 55
+    icon: ICON
+    colour: COLOUR
 ```
 
 - `MAP_NAME` is the identifier for the map we named earlier. So set it to the value of the map you'd like to add this marker to.
@@ -74,7 +74,7 @@ In short; `red`, `ff4444`, and `f44` are all valid options for roughly the same 
 
 #### Multiple markers from a single note
 
-It is possible to add multiple markers from a single note. In this case you'll have to add a list to the frontmatter. These markers can be added to the same map or to different maps.
+It is possible to add multiple markers from a single note. In this case you'll have to append to the list in the frontmatter. These markers can be added to the same map or to different maps.
 
 ```yaml
 marker:
