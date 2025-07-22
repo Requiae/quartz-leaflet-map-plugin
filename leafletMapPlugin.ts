@@ -237,7 +237,7 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
         { content: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" },
         {
           inline: true,
-          content: `#leaflet-map{width:100%;margin:0;z-index:0;background-color:#5078b41a;.leaflet-image-layer{margin:0!important}}.custom-div-icon .icon{position:absolute;width:32px;height:19px;font-size:19px;top:8px;left:0;z-index:inherit;margin:0 auto;display:flex;align-items:center;justify-content:center;color:#ebebec}.custom-div-icon .marker{position:absolute;width:32px;height:48px;margin:0 auto;z-index:inherit}`,
+          content: `.leaflet-map{width:100%;margin:0;z-index:0;background-color:#5078b41a;.leaflet-image-layer{margin:0!important}}.custom-div-icon .icon{position:absolute;width:32px;height:19px;font-size:19px;top:8px;left:0;z-index:inherit;margin:0 auto;display:flex;align-items:center;justify-content:center;color:#ebebec}.custom-div-icon .marker{position:absolute;width:32px;height:48px;margin:0 auto;z-index:inherit}`,
         },
       ],
       js: [
