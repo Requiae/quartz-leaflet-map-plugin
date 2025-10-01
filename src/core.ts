@@ -49,6 +49,7 @@ interface MapMetadata {
   src: string;
   minZoom: number;
   maxZoom: number;
+  zoomStep: number;
 }
 
 function isFrontmatterMarkerData(object: any): object is FrontmatterMarkerData {
@@ -139,26 +140,18 @@ function buildMarkerObject(marker: Marker, distance: number): Element {
 
 function collectMapMetadata(node: any): MapMetadata {
   // Parse data stored in callout meta data
-  const calloutMetadata = ((node.properties?.dataCalloutMetadata ?? "") as string)
-    .replaceAll(/(\\n)| /g, "")
-    .split("-");
+  const calloutMetadata = ((node.properties?.dataCalloutMetadata ?? "") as string).replaceAll(
+    /(\\n)| /g,
+    "",
+  );
 
-  var minZoom: number = 0;
-  var maxZoom: number = 2;
-
-  for (const data of calloutMetadata) {
-    const unpacked = data.split(":");
-    if (unpacked[0].toLowerCase() === "minzoom") {
-      minZoom = parseInt(unpacked[1]);
-    }
-    if (unpacked[0].toLowerCase() === "maxzoom") {
-      maxZoom = parseInt(unpacked[1]);
-    }
-  }
+  var minZoom = parseFloat((calloutMetadata.match(/minZoom:\s?(-?\d+\.?\d*)/) ?? ["", "0"])[1]);
+  var maxZoom = parseFloat((calloutMetadata.match(/maxZoom:\s?(-?\d+\.?\d*)/) ?? ["", "2"])[1]);
+  var zoomStep = parseFloat((calloutMetadata.match(/zoomStep:\s?(-?\d+\.?\d*)/) ?? ["", "0.5"])[1]);
 
   // Parse data stored in callout content
   var name = "";
-  visit(node, { type: "text" }, (target: any, _index, _parent) => {
+  visit(node, { type: "text" }, (target: any, _index: any, _parent: any) => {
     if (!target.value || target.value.replaceAll(/(\n)| /g, "") === "") {
       return;
     }
@@ -170,11 +163,11 @@ function collectMapMetadata(node: any): MapMetadata {
   });
 
   var src = "";
-  visit(node, { tagName: "img" }, (target: any, _index, _parent) => {
+  visit(node, { tagName: "img" }, (target: any, _index: any, _parent: any) => {
     src = target.properties.src;
   });
 
-  return { minZoom, maxZoom, name, src };
+  return { minZoom, maxZoom, zoomStep, name, src };
 }
 
 export const LeafletMap: QuartzTransformerPlugin = () => ({
@@ -192,7 +185,7 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
     return [
       () => {
         return (tree: Root, file: VFile) => {
-          visit(tree, { tagName: "blockquote" }, (node: any, index, parent) => {
+          visit(tree, { tagName: "blockquote" }, (node: any, index: any, parent: any) => {
             if (node.properties?.dataCallout !== "map" || !parent || index === undefined) {
               return;
             }
@@ -218,6 +211,7 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
                     "data-src": mapMetaData.src,
                     "data-min-zoom": mapMetaData.minZoom,
                     "data-max-zoom": mapMetaData.maxZoom,
+                    "data-zoom-step": mapMetaData.zoomStep,
                   },
                   children: markers.map((marker) => buildMarkerObject(marker, distanceToRoot)),
                 },

@@ -49,6 +49,7 @@ interface MapMetadata {
   src: string;
   minZoom: number;
   maxZoom: number;
+  zoomStep: number;
 }
 
 function isFrontmatterMarkerData(object: any): object is FrontmatterMarkerData {
@@ -139,26 +140,18 @@ function buildMarkerObject(marker: Marker, distance: number): Element {
 
 function collectMapMetadata(node: any): MapMetadata {
   // Parse data stored in callout meta data
-  const calloutMetadata = ((node.properties?.dataCalloutMetadata ?? "") as string)
-    .replaceAll(/(\\n)| /g, "")
-    .split("-");
+  const calloutMetadata = ((node.properties?.dataCalloutMetadata ?? "") as string).replaceAll(
+    /(\\n)| /g,
+    "",
+  );
 
-  var minZoom: number = 0;
-  var maxZoom: number = 2;
-
-  for (const data of calloutMetadata) {
-    const unpacked = data.split(":");
-    if (unpacked[0].toLowerCase() === "minzoom") {
-      minZoom = parseInt(unpacked[1]);
-    }
-    if (unpacked[0].toLowerCase() === "maxzoom") {
-      maxZoom = parseInt(unpacked[1]);
-    }
-  }
+  var minZoom = parseFloat((calloutMetadata.match(/minZoom:\s?(-?\d+\.?\d*)/) ?? ["", "0"])[1]);
+  var maxZoom = parseFloat((calloutMetadata.match(/maxZoom:\s?(-?\d+\.?\d*)/) ?? ["", "2"])[1]);
+  var zoomStep = parseFloat((calloutMetadata.match(/zoomStep:\s?(-?\d+\.?\d*)/) ?? ["", "0.5"])[1]);
 
   // Parse data stored in callout content
   var name = "";
-  visit(node, { type: "text" }, (target: any, _index, _parent) => {
+  visit(node, { type: "text" }, (target: any, _index: any, _parent: any) => {
     if (!target.value || target.value.replaceAll(/(\n)| /g, "") === "") {
       return;
     }
@@ -170,11 +163,11 @@ function collectMapMetadata(node: any): MapMetadata {
   });
 
   var src = "";
-  visit(node, { tagName: "img" }, (target: any, _index, _parent) => {
+  visit(node, { tagName: "img" }, (target: any, _index: any, _parent: any) => {
     src = target.properties.src;
   });
 
-  return { minZoom, maxZoom, name, src };
+  return { minZoom, maxZoom, zoomStep, name, src };
 }
 
 export const LeafletMap: QuartzTransformerPlugin = () => ({
@@ -192,7 +185,7 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
     return [
       () => {
         return (tree: Root, file: VFile) => {
-          visit(tree, { tagName: "blockquote" }, (node: any, index, parent) => {
+          visit(tree, { tagName: "blockquote" }, (node: any, index: any, parent: any) => {
             if (node.properties?.dataCallout !== "map" || !parent || index === undefined) {
               return;
             }
@@ -218,6 +211,7 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
                     "data-src": mapMetaData.src,
                     "data-min-zoom": mapMetaData.minZoom,
                     "data-max-zoom": mapMetaData.maxZoom,
+                    "data-zoom-step": mapMetaData.zoomStep,
                   },
                   children: markers.map((marker) => buildMarkerObject(marker, distanceToRoot)),
                 },
@@ -254,7 +248,7 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
         {
           loadTime: "afterDOMReady",
           contentType: "inline",
-          script: `var __awaiter=this&&this.__awaiter||function(e,c,t,o){function i(n){return n instanceof t?n:new t(function(a){a(n)})}return new(t||(t=Promise))(function(n,a){function l(u){try{r(o.next(u))}catch(f){a(f)}}function s(u){try{r(o.throw(u))}catch(f){a(f)}}function r(u){u.done?n(u.value):i(u.value).then(l,s)}r((o=o.apply(e,c||[])).next())})},__generator=this&&this.__generator||function(e,c){var t={label:0,sent:function(){if(n[0]&1)throw n[1];return n[1]},trys:[],ops:[]},o,i,n,a=Object.create((typeof Iterator=="function"?Iterator:Object).prototype);return a.next=l(0),a.throw=l(1),a.return=l(2),typeof Symbol=="function"&&(a[Symbol.iterator]=function(){return this}),a;function l(r){return function(u){return s([r,u])}}function s(r){if(o)throw new TypeError("Generator is already executing.");for(;a&&(a=0,r[0]&&(t=0)),t;)try{if(o=1,i&&(n=r[0]&2?i.return:r[0]?i.throw||((n=i.return)&&n.call(i),0):i.next)&&!(n=n.call(i,r[1])).done)return n;switch(i=0,n&&(r=[r[0]&2,n.value]),r[0]){case 0:case 1:n=r;break;case 4:return t.label++,{value:r[1],done:!1};case 5:t.label++,i=r[1],r=[0];continue;case 7:r=t.ops.pop(),t.trys.pop();continue;default:if(n=t.trys,!(n=n.length>0&&n[n.length-1])&&(r[0]===6||r[0]===2)){t=0;continue}if(r[0]===3&&(!n||r[1]>n[0]&&r[1]<n[3])){t.label=r[1];break}if(r[0]===6&&t.label<n[1]){t.label=n[1],n=r;break}if(n&&t.label<n[2]){t.label=n[2],t.ops.push(r);break}n[2]&&t.ops.pop(),t.trys.pop();continue}r=c.call(e,t)}catch(u){r=[6,u],i=0}finally{o=n=0}if(r[0]&5)throw r[1];return{value:r[0]?r[1]:void 0,done:!0}}};function buildIcon(e,c){return L.divIcon({className:"custom-div-icon",html:\` <svg class="marker" style="fill:\`.concat(c,\`" viewBox="0 0 233.3 349.9"> <path d="M116.6 0A116.8 115.9 0 0 0 0 115.7c0 25.8 16.5 67.7 50.6 128.2 24 42.8 47.7 78.5 48.7 80l17.3 26 17.4-26c1-1.5 24.7-37.2 48.7-80 34-60.5 50.6-102.4 50.6-128.2C233.3 52 181 0 116.6 0"/> </svg> <iconify-icon class="icon" icon="\`).concat(e,\`"></iconify-icon> \`),iconSize:[32,48],iconAnchor:[16,48],tooltipAnchor:[17,-36]})}function getMarkerOnClick(e){return function(c){window.location.href="".concat(e)}}function addMarker(e,c){function t(a,l,s){l.getZoom()>=s?a.addTo(l):a.remove()}var o={icon:buildIcon(e.icon,e.colour)},i=parseInt(e.minZoom),n=L.marker([parseInt(e.posY),parseInt(e.posX)],o).bindTooltip(e.name).on("click",getMarkerOnClick(e.link));t(n,c,i),c.on("zoomend",function(){return t(n,c,i)})}function isMarkerDataSet(e){return!(!e.name||!e.link||!e.posX||!e.posY||!e.icon||!e.colour||!e.minZoom)}function isMapDataSet(e){return!(!e.src||!e.minZoom||!e.maxZoom)}function getMarkerData(e){for(var c=[],t=0,o=e;t<o.length;t++){var i=o[t];isMarkerDataSet(i.dataset)&&c.push(i.dataset),i.remove()}return c}function getMapData(e){for(var c=[],t=0,o=e;t<o.length;t++){var i=o[t];isMapDataSet(i.dataset)&&c.push(i.dataset)}return c}function getMeta(e){return __awaiter(this,void 0,Promise,function(){return __generator(this,function(c){return[2,new Promise(function(t,o){var i=new Image;i.onload=function(){return t(i)},i.onerror=function(n){return o(n)},i.src=e})]})})}function initialiseMap(e,c){return __awaiter(this,void 0,Promise,function(){var t,o,i,n;return __generator(this,function(a){switch(a.label){case 0:return t=e.dataset,isMapDataSet(t)?[4,getMeta(t.src)]:[2];case 1:return o=a.sent(),e.style.aspectRatio=(o.naturalWidth/o.naturalHeight).toString(),i=[[0,0],[o.naturalHeight/2,o.naturalWidth/2]],n=L.map(e,{crs:L.CRS.Simple,maxBounds:i,minZoom:parseInt(t.minZoom),maxZoom:parseInt(t.maxZoom)}),L.imageOverlay(t.src,i).addTo(n),n.fitBounds(i),c.map(function(l){return addMarker(l,n)}),[2,n]}})})}function cleanupMap(e){e&&(e.clearAllEventListeners(),e.remove())}document.addEventListener("nav",function(){return __awaiter(void 0,void 0,void 0,function(){var e,c,t,o,i;return __generator(this,function(n){switch(n.label){case 0:e=document.querySelectorAll("div.leaflet-map"),c=function(a){var l,s,r;return __generator(this,function(u){switch(u.label){case 0:return l=a.querySelectorAll("div.leaflet-marker"),s=getMarkerData(l),[4,initialiseMap(a,s)];case 1:return r=u.sent(),window.addCleanup(function(){return cleanupMap(r)}),[2]}})},t=0,o=e,n.label=1;case 1:return t<o.length?(i=o[t],[5,c(i)]):[3,4];case 2:n.sent(),n.label=3;case 3:return t++,[3,1];case 4:return[2]}})})});`,
+          script: `var __awaiter=this&&this.__awaiter||function(e,a,t,i){function o(n){return n instanceof t?n:new t(function(c){c(n)})}return new(t||(t=Promise))(function(n,c){function l(u){try{r(i.next(u))}catch(f){c(f)}}function s(u){try{r(i.throw(u))}catch(f){c(f)}}function r(u){u.done?n(u.value):o(u.value).then(l,s)}r((i=i.apply(e,a||[])).next())})},__generator=this&&this.__generator||function(e,a){var t={label:0,sent:function(){if(n[0]&1)throw n[1];return n[1]},trys:[],ops:[]},i,o,n,c=Object.create((typeof Iterator=="function"?Iterator:Object).prototype);return c.next=l(0),c.throw=l(1),c.return=l(2),typeof Symbol=="function"&&(c[Symbol.iterator]=function(){return this}),c;function l(r){return function(u){return s([r,u])}}function s(r){if(i)throw new TypeError("Generator is already executing.");for(;c&&(c=0,r[0]&&(t=0)),t;)try{if(i=1,o&&(n=r[0]&2?o.return:r[0]?o.throw||((n=o.return)&&n.call(o),0):o.next)&&!(n=n.call(o,r[1])).done)return n;switch(o=0,n&&(r=[r[0]&2,n.value]),r[0]){case 0:case 1:n=r;break;case 4:return t.label++,{value:r[1],done:!1};case 5:t.label++,o=r[1],r=[0];continue;case 7:r=t.ops.pop(),t.trys.pop();continue;default:if(n=t.trys,!(n=n.length>0&&n[n.length-1])&&(r[0]===6||r[0]===2)){t=0;continue}if(r[0]===3&&(!n||r[1]>n[0]&&r[1]<n[3])){t.label=r[1];break}if(r[0]===6&&t.label<n[1]){t.label=n[1],n=r;break}if(n&&t.label<n[2]){t.label=n[2],t.ops.push(r);break}n[2]&&t.ops.pop(),t.trys.pop();continue}r=a.call(e,t)}catch(u){r=[6,u],o=0}finally{i=n=0}if(r[0]&5)throw r[1];return{value:r[0]?r[1]:void 0,done:!0}}};function buildIcon(e,a){return L.divIcon({className:"custom-div-icon",html:\` <svg class="marker" style="fill:\`.concat(a,\`" viewBox="0 0 233.3 349.9"> <path d="M116.6 0A116.8 115.9 0 0 0 0 115.7c0 25.8 16.5 67.7 50.6 128.2 24 42.8 47.7 78.5 48.7 80l17.3 26 17.4-26c1-1.5 24.7-37.2 48.7-80 34-60.5 50.6-102.4 50.6-128.2C233.3 52 181 0 116.6 0"/> </svg> <iconify-icon class="icon" icon="\`).concat(e,\`"></iconify-icon> \`),iconSize:[32,48],iconAnchor:[16,48],tooltipAnchor:[17,-36]})}function getMarkerOnClick(e){return function(a){window.location.href="".concat(e)}}function addMarker(e,a){function t(c,l,s){l.getZoom()>=s?c.addTo(l):c.remove()}var i={icon:buildIcon(e.icon,e.colour)},o=parseInt(e.minZoom),n=L.marker([parseInt(e.posY),parseInt(e.posX)],i).bindTooltip(e.name).on("click",getMarkerOnClick(e.link));t(n,a,o),a.on("zoomend",function(){return t(n,a,o)})}function isMarkerDataSet(e){return!(!e.name||!e.link||!e.posX||!e.posY||!e.icon||!e.colour||!e.minZoom)}function isMapDataSet(e){return!(!e.src||!e.minZoom||!e.maxZoom||!e.zoomStep)}function getMarkerData(e){for(var a=[],t=0,i=e;t<i.length;t++){var o=i[t];isMarkerDataSet(o.dataset)&&a.push(o.dataset),o.remove()}return a}function getMapData(e){for(var a=[],t=0,i=e;t<i.length;t++){var o=i[t];isMapDataSet(o.dataset)&&a.push(o.dataset)}return a}function getMeta(e){return __awaiter(this,void 0,Promise,function(){return __generator(this,function(a){return[2,new Promise(function(t,i){var o=new Image;o.onload=function(){return t(o)},o.onerror=function(n){return i(n)},o.src=e})]})})}function initialiseMap(e,a){return __awaiter(this,void 0,Promise,function(){var t,i,o,n;return __generator(this,function(c){switch(c.label){case 0:return t=e.dataset,isMapDataSet(t)?[4,getMeta(t.src)]:[2];case 1:return i=c.sent(),e.style.aspectRatio=(i.naturalWidth/i.naturalHeight).toString(),o=[[0,0],[i.naturalHeight/2,i.naturalWidth/2]],n=L.map(e,{crs:L.CRS.Simple,maxBounds:o,minZoom:parseFloat(t.minZoom),maxZoom:parseFloat(t.maxZoom),zoomSnap:.01,zoomDelta:parseFloat(t.zoomStep)}),L.imageOverlay(t.src,o).addTo(n),n.fitBounds(o),a.map(function(l){return addMarker(l,n)}),[2,n]}})})}function cleanupMap(e){e&&(e.clearAllEventListeners(),e.remove())}document.addEventListener("nav",function(){return __awaiter(void 0,void 0,void 0,function(){var e,a,t,i,o;return __generator(this,function(n){switch(n.label){case 0:e=document.querySelectorAll("div.leaflet-map"),a=function(c){var l,s,r;return __generator(this,function(u){switch(u.label){case 0:return l=c.querySelectorAll("div.leaflet-marker"),s=getMarkerData(l),[4,initialiseMap(c,s)];case 1:return r=u.sent(),window.addCleanup(function(){return cleanupMap(r)}),[2]}})},t=0,i=e,n.label=1;case 1:return t<i.length?(o=i[t],[5,a(o)]):[3,4];case 2:n.sent(),n.label=3;case 3:return t++,[3,1];case 4:return[2]}})})});`,
         },
       ],
     };

@@ -13,6 +13,7 @@ interface MapDataSet {
   src: string;
   minZoom: string;
   maxZoom: string;
+  zoomStep: string;
 }
 
 function buildIcon(icon: string, colour: string) {
@@ -68,7 +69,7 @@ function isMarkerDataSet(dataset: any): dataset is MarkerDataSet {
 }
 
 function isMapDataSet(dataset: any): dataset is MapDataSet {
-  if (!dataset["src"] || !dataset["minZoom"] || !dataset["maxZoom"]) {
+  if (!dataset["src"] || !dataset["minZoom"] || !dataset["maxZoom"] || !dataset["zoomStep"]) {
     return false;
   }
   return true;
@@ -125,8 +126,10 @@ async function initialiseMap(
   const mapItem = L.map(mapElement, {
     crs: L.CRS.Simple,
     maxBounds: bounds,
-    minZoom: parseInt(dataset.minZoom),
-    maxZoom: parseInt(dataset.maxZoom),
+    minZoom: parseFloat(dataset.minZoom),
+    maxZoom: parseFloat(dataset.maxZoom),
+    zoomSnap: 0.01,
+    zoomDelta: parseFloat(dataset.zoomStep),
   });
 
   L.imageOverlay(dataset.src, bounds).addTo(mapItem);
