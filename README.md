@@ -15,13 +15,14 @@ Adds a custom leaflet map implementation for [Quartz](https://github.com/jackyzh
 Adding a map to a note is done by adding the following block of code to where you want the map to appear.
 
 ```md
-> [!map|minZoom:-0.5-maxZoom:2-zoomStep:0.5] MAP_NAME
+> [!map|minZoom:-0.5-maxZoom:2-initialZoom:0-zoomStep:0.5] MAP_NAME
 > ![[IMAGE.PNG]]
 ```
 
 - `MAP_NAME` can be replaced by how you'd like to call your map. You should remember this value as we'll need it to add markers to you map later on. The map name does not need to be unique, but be sure the images are either identical or compatible for marker placement.
 - `IMAGE.PNG` can be any image supported by Quartz
-- `minZoom`, `maxZoom` are optional boundaries on how much you'll be able to zoom the map. Depending on your map image you might need to fiddle with these, or remove them altogether since they are optional. These values are allowed to be decimal numbers and can be negative.
+- `minZoom`, `maxZoom` are optional boundaries on how much you'll be able to zoom the map. Depending on your map image you might need to fiddle with these, or remove them altogether since they are optional. These values are allowed to be decimal numbers and can be negative. The values default to 0 and 2 respectively.
+- `initialZoom` is an optional value that determines the initial zoom. The value devaults to `minZoom`
 - `zoomStep` is an optional value that allows the user to control how granular zooming is. This value is allowed to be a decimal number.
 
 ### How to add a marker to a map
