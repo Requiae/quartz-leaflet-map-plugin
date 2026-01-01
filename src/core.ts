@@ -49,6 +49,7 @@ interface MapMetadata {
   src: string;
   minZoom: number;
   maxZoom: number;
+  initialZoom: number;
   zoomStep: number;
 }
 
@@ -147,6 +148,9 @@ function collectMapMetadata(node: any): MapMetadata {
 
   var minZoom = parseFloat((calloutMetadata.match(/minZoom:\s?(-?\d+\.?\d*)/) ?? ["", "0"])[1]);
   var maxZoom = parseFloat((calloutMetadata.match(/maxZoom:\s?(-?\d+\.?\d*)/) ?? ["", "2"])[1]);
+  var initialZoom = parseFloat(
+    (calloutMetadata.match(/initialZoom:\s?(-?\d+\.?\d*)/) ?? ["", minZoom.toString()])[1],
+  );
   var zoomStep = parseFloat((calloutMetadata.match(/zoomStep:\s?(-?\d+\.?\d*)/) ?? ["", "0.5"])[1]);
 
   // Parse data stored in callout content
@@ -167,7 +171,7 @@ function collectMapMetadata(node: any): MapMetadata {
     src = target.properties.src;
   });
 
-  return { minZoom, maxZoom, zoomStep, name, src };
+  return { minZoom, maxZoom, initialZoom, zoomStep, name, src };
 }
 
 export const LeafletMap: QuartzTransformerPlugin = () => ({
@@ -211,6 +215,7 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
                     "data-src": mapMetaData.src,
                     "data-min-zoom": mapMetaData.minZoom,
                     "data-max-zoom": mapMetaData.maxZoom,
+                    "data-initial-zoom": mapMetaData.initialZoom,
                     "data-zoom-step": mapMetaData.zoomStep,
                   },
                   children: markers.map((marker) => buildMarkerObject(marker, distanceToRoot)),
