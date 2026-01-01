@@ -32,7 +32,7 @@ interface Marker {
   position: { x: number; y: number };
   icon: string;
   colour: string;
-  minZoom: number;
+  minZoom?: number;
 }
 
 interface FrontmatterMarkerData {
@@ -54,7 +54,7 @@ interface MapMetadata {
 }
 
 function isFrontmatterMarkerData(object: any): object is FrontmatterMarkerData {
-  if (!object || !object.x || !object.y || !object.icon) {
+  if (!object || !("x" in object) || !("y" in object) || !("icon" in object)) {
     return false;
   }
 
@@ -116,12 +116,12 @@ function buildMarkerData(file: VFile): void {
       position: { x: parseInt(marker.x), y: parseInt(marker.y) },
       icon: marker.icon,
       colour: getColourValue(marker.colour),
-      minZoom: marker.minZoom ? parseInt(marker.minZoom) : -1,
+      minZoom: marker.minZoom ? parseInt(marker.minZoom) : undefined,
     });
   }
 }
 
-function buildMarkerObject(marker: Marker, distance: number): Element {
+function buildMarkerObject(marker: Marker, distance: number, mapMinZoom: number): Element {
   return {
     type: "element",
     tagName: "div",
@@ -133,7 +133,7 @@ function buildMarkerObject(marker: Marker, distance: number): Element {
       "data-pos-y": marker.position.y,
       "data-icon": marker.icon,
       "data-colour": marker.colour,
-      "data-min-zoom": marker.minZoom,
+      "data-min-zoom": marker.minZoom ?? mapMinZoom,
     },
     children: [],
   };
@@ -218,7 +218,9 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
                     "data-initial-zoom": mapMetaData.initialZoom,
                     "data-zoom-step": mapMetaData.zoomStep,
                   },
-                  children: markers.map((marker) => buildMarkerObject(marker, distanceToRoot)),
+                  children: markers.map((marker) =>
+                    buildMarkerObject(marker, distanceToRoot, mapMetaData.minZoom),
+                  ),
                 },
               ],
             };
