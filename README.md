@@ -92,6 +92,22 @@ marker:
     colour: 4f4
 ```
 
+## Troubleshooting
+### If you use the Obsidian Note Properties Plugin and your markers don't show up
+Obsidian doesn't support nested YAML via the Note Properties plugin ([source](https://help.obsidian.md/properties#Not+supported)). Luckily there is a way around this, but it isn't as pretty, since instead of YAML we have to use JSON.
+
+This means that as a property a single marker in a file looks like
+```
+marker: { "mapName":"map","x":100,"y":55,"icon":"mdi:anvil","colour":"red"}
+```
+and that multiple markers in a file look like
+```
+marker: [{"mapName":"map","x":100,"y":55,"icon":"mdi:anvil","colour":"red"},{"mapName":"map","x":150,"y":55,"icon":"mdi:alien","colour":"4f4"}]
+```
+
+### If you use Quartz Syncer and your markers don't show up
+Chances are that your Syncer settings do include all frontmatter/note properties. Try enabling the setting in Quartz Syncer to include all frontmatter/note properties.
+
 ## Credits
 
 - [Quartz](https://github.com/jackyzha0/quartz) for which this plugin is for.
