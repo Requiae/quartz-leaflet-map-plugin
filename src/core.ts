@@ -115,7 +115,11 @@ function buildMarkerData(file: VFile): void {
       position: { x: parseInt(marker.x), y: parseInt(marker.y) },
       icon: marker.icon,
       colour: getColourValue(marker.colour),
+<<<<<<< Updated upstream
       minZoom: marker.minZoom ? parseInt(marker.minZoom) : -1,
+=======
+      minZoom: marker.minZoom ? parseFloat(marker.minZoom) : undefined,
+>>>>>>> Stashed changes
     });
   }
 }
