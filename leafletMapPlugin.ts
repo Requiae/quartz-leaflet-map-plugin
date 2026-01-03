@@ -32,7 +32,7 @@ interface Marker {
   position: { x: number; y: number };
   icon: string;
   colour: string;
-  minZoom: number;
+  minZoom?: number;
 }
 
 interface FrontmatterMarkerData {
@@ -49,11 +49,12 @@ interface MapMetadata {
   src: string;
   minZoom: number;
   maxZoom: number;
+  initialZoom: number;
   zoomStep: number;
 }
 
 function isFrontmatterMarkerData(object: any): object is FrontmatterMarkerData {
-  if (!object || !object.x || !object.y || !object.icon) {
+  if (!object || !("x" in object) || !("y" in object) || !("icon" in object)) {
     return false;
   }
 
@@ -115,16 +116,12 @@ function buildMarkerData(file: VFile): void {
       position: { x: parseInt(marker.x), y: parseInt(marker.y) },
       icon: marker.icon,
       colour: getColourValue(marker.colour),
-<<<<<<< Updated upstream
-      minZoom: marker.minZoom ? parseInt(marker.minZoom) : -1,
-=======
       minZoom: marker.minZoom ? parseFloat(marker.minZoom) : undefined,
->>>>>>> Stashed changes
     });
   }
 }
 
-function buildMarkerObject(marker: Marker, distance: number): Element {
+function buildMarkerObject(marker: Marker, distance: number, mapMinZoom: number): Element {
   return {
     type: "element",
     tagName: "div",
@@ -136,7 +133,7 @@ function buildMarkerObject(marker: Marker, distance: number): Element {
       "data-pos-y": marker.position.y,
       "data-icon": marker.icon,
       "data-colour": marker.colour,
-      "data-min-zoom": marker.minZoom,
+      "data-min-zoom": marker.minZoom ?? mapMinZoom,
     },
     children: [],
   };
@@ -151,6 +148,9 @@ function collectMapMetadata(node: any): MapMetadata {
 
   var minZoom = parseFloat((calloutMetadata.match(/minZoom:\s?(-?\d+\.?\d*)/) ?? ["", "0"])[1]);
   var maxZoom = parseFloat((calloutMetadata.match(/maxZoom:\s?(-?\d+\.?\d*)/) ?? ["", "2"])[1]);
+  var initialZoom = parseFloat(
+    (calloutMetadata.match(/initialZoom:\s?(-?\d+\.?\d*)/) ?? ["", minZoom.toString()])[1],
+  );
   var zoomStep = parseFloat((calloutMetadata.match(/zoomStep:\s?(-?\d+\.?\d*)/) ?? ["", "0.5"])[1]);
 
   // Parse data stored in callout content
@@ -171,7 +171,7 @@ function collectMapMetadata(node: any): MapMetadata {
     src = target.properties.src;
   });
 
-  return { minZoom, maxZoom, zoomStep, name, src };
+  return { minZoom, maxZoom, initialZoom, zoomStep, name, src };
 }
 
 export const LeafletMap: QuartzTransformerPlugin = () => ({
@@ -215,9 +215,12 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
                     "data-src": mapMetaData.src,
                     "data-min-zoom": mapMetaData.minZoom,
                     "data-max-zoom": mapMetaData.maxZoom,
+                    "data-initial-zoom": mapMetaData.initialZoom,
                     "data-zoom-step": mapMetaData.zoomStep,
                   },
-                  children: markers.map((marker) => buildMarkerObject(marker, distanceToRoot)),
+                  children: markers.map((marker) =>
+                    buildMarkerObject(marker, distanceToRoot, mapMetaData.minZoom),
+                  ),
                 },
               ],
             };

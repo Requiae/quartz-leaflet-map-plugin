@@ -13,6 +13,7 @@ interface MapDataSet {
   src: string;
   minZoom: string;
   maxZoom: string;
+  initialZoom: string;
   zoomStep: string;
 }
 
@@ -137,6 +138,8 @@ async function initialiseMap(
 
   mapItem.fitBounds(bounds);
   markers.map((marker) => addMarker(marker, mapItem));
+  console.log(parseFloat(dataset.initialZoom));
+  mapItem.setZoom(parseFloat(dataset.initialZoom));
 
   return mapItem;
 }
