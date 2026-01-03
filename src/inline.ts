@@ -40,12 +40,13 @@ function getMarkerOnClick(url: string): L.LeafletMouseEventHandlerFn {
 
 function addMarker(markerData: MarkerDataSet, mapItem: L.Map) {
   function addMarkerWhenZoom(markerItem: L.Marker, mapItem: L.Map, markerZoom: number) {
-    mapItem.getZoom() >= markerZoom ? markerItem.addTo(mapItem) : markerItem.remove();
+    const tolerance = 0.00001; // We have to deal with floating point errors
+    mapItem.getZoom() >= markerZoom - tolerance ? markerItem.addTo(mapItem) : markerItem.remove();
   }
 
   const options = { icon: buildIcon(markerData.icon, markerData.colour) };
 
-  const markerZoom = parseInt(markerData.minZoom);
+  const markerZoom = parseFloat(markerData.minZoom);
   const markerItem = L.marker([parseInt(markerData.posY), parseInt(markerData.posX)], options)
     .bindTooltip(markerData.name)
     .on("click", getMarkerOnClick(markerData.link));
