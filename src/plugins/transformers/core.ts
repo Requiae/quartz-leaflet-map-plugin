@@ -4,7 +4,7 @@ import { visit } from "unist-util-visit";
 import { Node, Parent } from "unist";
 import { VFile } from "vfile";
 import { Element } from "hast";
-import { parse } from "yaml";
+import { load } from "js-yaml";
 import { BuildCtx } from "../../util/ctx";
 import { FilePath, FullSlug, resolveRelative, transformLink } from "../../util/path";
 
@@ -70,6 +70,16 @@ const C = {
             unit: "",
         },
     },
+    marker: {
+        default: {
+            colour: "#21409a",
+            icon: "circle-small",
+        },
+    },
+    versions: {
+        leaflet: "1.9.4/dist/leaflet.js",
+        lucide: "0.575.0",
+    },
 } as const;
 
 /**
@@ -78,7 +88,7 @@ const C = {
 
 function isNonEmptyObject(value: unknown): value is { [key: string]: unknown } {
     if (!value || typeof value !== "object") return false;
-    return Object.keys.length > 0;
+    return Object.keys(value).length > 0;
 }
 
 function isNotNull<T>(value: T | null): value is T {
@@ -252,8 +262,8 @@ function buildMarkerElement(
             "data-name": marker.name,
             "data-link": resolveRelative(currentSlug, marker.link as FullSlug),
             "data-coordinates": marker.coordinates,
-            "data-icon": marker.icon,
-            "data-colour": marker.colour,
+            "data-icon": (marker.icon ?? C.marker.default.icon).replace("lucide-", ""),
+            "data-colour": marker.colour ?? C.marker.default.colour,
             "data-min-zoom": marker.minZoom ?? mapMinZoom,
         },
         children: [],
@@ -265,7 +275,22 @@ declare module "vfile" {
         slug: FullSlug;
         filePath: FilePath;
         relativePath: FilePath;
-        frontmatter: { [key: string]: unknown } & { title: string };
+        frontmatter: { [key: string]: unknown } & { title: string } & Partial<{
+                tags: string[];
+                aliases: string[];
+                modified: string;
+                created: string;
+                published: string;
+                description: string;
+                socialDescription: string;
+                publish: boolean | string;
+                draft: boolean | string;
+                lang: string;
+                enableToc: string;
+                cssclasses: string[];
+                socialImage: string;
+                comments: boolean | string;
+            }>;
     }
 }
 
@@ -287,7 +312,7 @@ function source(node: ExtendedNode): string {
 }
 
 function parseMapFromNode(node: ExtendedNode): MapObject | undefined {
-    const entry: unknown = parse(source(node));
+    const entry: unknown = load(source(node));
     if (!isNonEmptyObject(entry) || !Array.isArray(entry.views)) return;
     return entry.views
         .map((view) => {
@@ -402,7 +427,6 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
     externalResources() {
         return {
             css: [
-                { content: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" },
                 {
                     inline: true,
                     content: `INLINE_CSS_SOURCE`,
@@ -411,12 +435,12 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
             js: [
                 {
                     loadTime: "afterDOMReady",
-                    src: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+                    src: `https://unpkg.com/leaflet@${C.versions.leaflet}`,
                     contentType: "external",
                 },
                 {
                     loadTime: "beforeDOMReady",
-                    src: "https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js",
+                    src: `https://unpkg.com/lucide@${C.versions.lucide}`,
                     contentType: "external",
                 },
                 {
