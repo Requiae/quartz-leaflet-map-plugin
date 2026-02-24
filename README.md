@@ -98,5 +98,12 @@ Chances are that your Syncer settings do include all frontmatter/note properties
 ## Credits
 
 - [Quartz](https://github.com/jackyzha0/quartz) for which this plugin is for.
-- [Iconify](https://iconify.design/) for the API this plugin uses to load its icons.
+- [Lucide](https://lucide.dev/) for the API this plugin uses to load its icons.
 - [Leaflet](https://github.com/Leaflet/Leaflet) which makes the whole plugin even possible.
+
+## Make a new release
+
+```shell
+git tag -a 1.0.1 -m "1.0.1"
+git push origin 1.0.1
+```
