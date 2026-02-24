@@ -50,7 +50,6 @@ interface MapDataSet {
  * CONSTANTS.TS
  */
 
-// Data stored across several invocations of this plugin
 const C = {
     map: {
         default: {
