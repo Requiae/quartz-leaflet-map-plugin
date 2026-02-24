@@ -1,7 +1,11 @@
 # Quarts Leaflet Map Plugin
 
 This the the [Quartz](https://github.com/jackyzha0/quartz) counterpart of the [Obsidian Leaflet Bases](https://github.com/Requiae/obsidian-leaflet-bases-plugin) plugin.
-This plugin adds a custom leaflet map implementation for websites build using Quartz
+This plugin adds a custom leaflet map implementation for websites build using Quartz.
+
+## Demo
+
+A live demo can be found [here](https://requiae.github.io/quartz-leaflet-map-plugin-demo/) and its source [here](https://github.com/Requiae/quartz-leaflet-map-plugin-demo).
 
 ## How to add it to your quartz
 
