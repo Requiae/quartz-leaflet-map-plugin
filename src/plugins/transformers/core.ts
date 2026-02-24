@@ -99,6 +99,11 @@ function clamp(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);
 }
 
+function cleanSource(source: string | Wiki): string {
+    if (typeof source === "string") return source;
+    return source.toString().replaceAll("[", "").replaceAll("]", "");
+}
+
 /**
  * VALIDATORS.TS
  */
@@ -345,7 +350,7 @@ function buildMapData(ctx: BuildCtx, file: VFile, node: ExtendedNode): Element |
 
     const currentSlug = file.data.slug;
     if (!currentSlug) throw new Error(`${file.path} has no slug`);
-    const mapSource = transformLink(currentSlug, mapData.image.toString(), {
+    const mapSource = transformLink(currentSlug, cleanSource(mapData.image), {
         strategy: "shortest",
         allSlugs: ctx.allSlugs,
     });
