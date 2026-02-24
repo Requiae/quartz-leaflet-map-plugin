@@ -1,8 +1,15 @@
 # Quarts Leaflet Map Plugin
 
-Adds a custom leaflet map implementation for [Quartz](https://github.com/jackyzha0/quartz) built websites.
+This the the [Quartz](https://github.com/jackyzha0/quartz) counterpart of the [Obsidian Leaflet Bases](https://github.com/Requiae/obsidian-leaflet-bases-plugin) plugin.
+This plugin adds a custom leaflet map implementation for websites build using Quartz
 
 ## How to add it to your quartz
+
+### Quartz v4
+
+> Quartz v4 does not have a bases implementation. As such it is highly recommended (read 'basically required') to use the `mapName` feature if your vault has multiple maps.
+
+Ensure you have a release tagged for Quartz v4
 
 - Add file `leafletMapPlugin.ts` to your `quartz\plugins\transformers\`
 - Append line `export { LeafletMap } from "./leafletMapPlugin"` to your `quartz\plugins\transformers\index.ts`
@@ -14,98 +21,78 @@ Adds a custom leaflet map implementation for [Quartz](https://github.com/jackyzh
 
 Adding a map to a note is done by adding the following block of code to where you want the map to appear.
 
-```md
-> [!map|minZoom:-0.5-maxZoom:2-initialZoom:0-zoomStep:0.5] MAP_NAME
-> ![[IMAGE.PNG]]
+````markdown
+```base
+views:
+  - type: leaflet-map
+    name: Map
+    mapName: test
+    image: assets/Locke.png
+    height: 400
+    minZoom: -1.5
+    maxZoom: 2
+    defaultZoom: -1.5
+    zoomDelta: 0.25
+    scale: "0.2"
+    unit: km
 ```
+````
 
-- `MAP_NAME` can be replaced by how you'd like to call your map. You should remember this value as we'll need it to add markers to you map later on. The map name does not need to be unique, but be sure the images are either identical or compatible for marker placement.
-- `IMAGE.PNG` can be any image supported by Quartz
-- `minZoom`, `maxZoom` are optional boundaries on how much you'll be able to zoom the map. Depending on your map image you might need to fiddle with these, or remove them altogether since they are optional. These values are allowed to be decimal numbers and can be negative. The values default to 0 and 2 respectively.
-- `initialZoom` is an optional value that determines the initial zoom. The value devaults to `minZoom`
-- `zoomStep` is an optional value that allows the user to control how granular zooming is. This value is allowed to be a decimal number.
+| Setting     | What it does                                                                                              |
+| ----------- | --------------------------------------------------------------------------------------------------------- |
+| type        | The type of base, don't change this (from Obsidian bases)                                                 |
+| name        | What the view is called (from Obsidian bases)                                                             |
+| image       | The image the map should show. It also accepts wiki links. Can be any image supported by Quartz           |
+| mapName     | Optional identifier for the map. Useful if you want to reuse a note across several maps                   |
+| defaultZoom | The zoom value the map opens with. Defaults to `minZoom`                                                  |
+| minZoom     | How far you can zoom out. Defaults to 0. This value is allowed to be a decimal number and can be negative |
+| maxZoom     | How far you can zoom in. Defaults to 2. This value is allowed to be a decimal number and can be negative  |
+| zoomDelta   | How granular zooming is. This value is allowed to be a decimal number.                                    |
+| scale       | How much to scale the result of the measure tool. This value is allowed to be a decimal number            |
+| unit        | The unit the measure tool uses (think km, mi, hours)                                                      |
+
+> Technically only `type`, `name`, and `image` are required for the map view to work. However you'll likely end up using most of the other settings.
+
+> In v4 only `image` is required for the map view to work.
+
+- `mapName` can be replaced by how you'd like to call your map. You should remember this value as we'll need it to add markers to you map later on. The map name does not need to be unique, but be sure the images are either identical or compatible for marker placement.
+- `minZoom`, `maxZoom` are optional boundaries on how much you'll be able to zoom the map. Depending on your map image you might need to fiddle with these, or remove them altogether since they are optional.
 
 ### How to add a marker to a map
 
-Adding a marker to a map is done by adding the following block of code to the note you'd want the marker to link to.
+Adding a marker to a map is done by adding the following block of code to the frontmatter of the note you'd want the marker to link to. The example adds two markers.
 
 ```yaml
+---
 marker:
-  - mapName: MAP_NAME
-    x: 100
-    y: 55
-    icon: ICON
-    colour: COLOUR
+    - coordinates: 100, 300
+      icon: lucide-tree-pine
+      colour: "#039c4b"
+      minZoom: 1
+    - coordinates: 5, 5
+      mapName: mapName
+      colour: "#bdf123"
+---
 ```
 
-- `MAP_NAME` is the identifier for the map we named earlier. So set it to the value of the map you'd like to add this marker to.
-- `x` and `y` are the coordinates on the map the marker needs to be placed. This might require some fiddling to get right.
-- The `ICON` and `COLOUR` options are explained below.
+| Setting      |             | What it does                                                                                |
+| ------------ | ----------- | ------------------------------------------------------------------------------------------- |
+| Map name     | mapName     | If you want this marker to only show for a certain map, set this to the mapname of that map |
+| Coordinates  | coordinates | Where the marker is placed on the map. Format is "latitude, longitude"                      |
+| Icon         | icon        | Which icon to use for the marker. Can be any [lucide icon](https://lucide.dev/icons/).      |
+| Colour       | colour      | Which colour the marker will be                                                             |
+| Minimal zoom | minZoom     | How far zoomed in the map should be before the marker becomes visible                       |
 
-#### Marker icons
-
-This plugin makes use of [Iconify](https://iconify.design/) for its markers, this gives you a enormous free range of vector icons to pick from. To show you how to pick an icon I'm going to walk you through an example.
-
-I like the [Material Design Icons](https://icon-sets.iconify.design/mdi/) set and I am looking for a icon to represent a smithy for my fantasy world. By searching through the icons I found the following anvil
-
-![alt text](docs/image.png)
-
-You can just click the copy icon to receive the icon name, `mdi:anvil` in this case. `mdi` tells Iconify which set to look in and `anvil` is the icon within that set. We need the full icon name.
-
-#### Marker colours
-
-This plugin uses 10 predefined colours, but also allows for custom colours to be used.
-
-The predefined colours are:
-|Colour|Hex|
-|------|---|
-|green| #039c4b |
-|lime| #66d313 |
-|yellow| #e2c505 |
-|pink| #ff0984 |
-|blue| #21409a |
-|lightblue| #04adff |
-|brown| #e48873 |
-|orange| #f16623 |
-|red| #f44546 |
-|purple| #7623a5 |
-
-The custom colours have to be 3- or 6-digit hex colours, however due to the frontmatter being written in yaml we'll have to omit the `#`.
-
-In short; `red`, `ff4444`, and `f44` are all valid options for roughly the same colour.
-
-#### Multiple markers from a single note
-
-It is possible to add multiple markers from a single note. In this case you'll have to append to the list in the frontmatter. These markers can be added to the same map or to different maps.
-
-```yaml
-marker:
-  - mapName: map
-    x: 100
-    y: 55
-    icon: mdi:anvil
-    colour: red
-  - mapName: map
-    x: 150
-    y: 55
-    icon: mdi:alien
-    colour: 4f4
-```
+> Technically only 'coordinates' is required for the marker to be valid. However you'll likely end up using most of the other settings.
 
 ## Troubleshooting
-### If you use the Obsidian Note Properties Plugin and your markers don't show up
-Obsidian doesn't support nested YAML via the Note Properties plugin ([source](https://help.obsidian.md/properties#Not+supported)). Luckily there is a way around this, but it isn't as pretty, since instead of YAML we have to use JSON.
 
-This means that as a property a single marker in a file looks like
-```
-marker: { "mapName":"map","x":100,"y":55,"icon":"mdi:anvil","colour":"red"}
-```
-and that multiple markers in a file look like
-```
-marker: [{"mapName":"map","x":100,"y":55,"icon":"mdi:anvil","colour":"red"},{"mapName":"map","x":150,"y":55,"icon":"mdi:alien","colour":"4f4"}]
-```
+### If you use the Obsidian and your markers don't show up
+
+Obsidian doesn't support nested YAML via the Note Properties plugin ([source](https://help.obsidian.md/properties#Not+supported)). However the [Obsidian Leaflet Bases](https://github.com/Requiae/obsidian-leaflet-bases-plugin) plugin adds tools to simply making and editing markers.
 
 ### If you use Quartz Syncer and your markers don't show up
+
 Chances are that your Syncer settings do include all frontmatter/note properties. Try enabling the setting in Quartz Syncer to include all frontmatter/note properties.
 
 ## Credits
