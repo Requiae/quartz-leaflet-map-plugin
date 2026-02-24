@@ -26,6 +26,3 @@ jobs:
             # Build the final file
             - name: Build plugin
               run: npm run build
-
-            # Commit all changed files back to the repository
-            - uses: stefanzweifel/git-auto-commit-action@v6
