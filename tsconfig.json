@@ -1,12 +1,12 @@
 {
     "compilerOptions": {
         "paths": {
-            "plugin/*": ["./src/plugin/*"]
+            "plugin/*": ["./src/plugins/*"]
         },
         "inlineSourceMap": true,
         "inlineSources": true,
         "module": "es2022",
-        "target": "es2022",
+        "target": "ES6",
         "allowJs": true,
         "noImplicitAny": true,
         "noImplicitThis": true,
@@ -22,20 +22,14 @@
         "useUnknownInCatchVariables": true,
         "outDir": "./build",
         "rootDir": "./src",
-        "lib": ["DOM", "ES5", "ES6", "ES7"],
+        "lib": ["DOM", "ES5", "ES6", "ES7", "es2022"],
 
         "experimentalDecorators": true,
         "strict": true,
-        "incremental": true,
         "resolveJsonModule": true,
-        "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "esModuleInterop": true,
-        "jsx": "react-jsx",
-        "jsxImportSource": "preact"
+        "noUnusedParameters": true
     },
-    "lib": ["esnext", "DOM", "DOM.Iterable"],
     "include": ["src/**/*.ts"]
 }
