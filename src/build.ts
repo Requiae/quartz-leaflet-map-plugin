@@ -1,7 +1,6 @@
 import { readFile, writeFile } from "fs/promises";
 import { transpileModule, ModuleKind } from "typescript";
 import { transform } from "esbuild";
-import { existsSync, mkdirSync } from "fs";
 
 function tsCompile(source: string): string {
     return transpileModule(source, {
@@ -45,8 +44,7 @@ async function buildSource(): Promise<void> {
         .replace("INLINE_CSS_SOURCE", compiledCss)
         .replace("INLINE_JS_SOURCE", compiledJS);
 
-    if (!existsSync("./build")) mkdirSync("./build");
-    await writeFile("./build/leafletMapPlugin.ts", buildString, "utf8");
+    await writeFile("./leafletMapPlugin.ts", buildString, "utf8");
 }
 
 await buildSource();
