@@ -265,7 +265,9 @@ function buildMarkerElement(
         properties: {
             class: ["leaflet-marker"],
             "data-name": marker.name,
-            "data-link": resolveRelative(currentSlug, marker.link as FullSlug),
+            "data-link": /https?:/.test(marker.link)
+                ? marker.link
+                : resolveRelative(currentSlug, marker.link as FullSlug),
             "data-coordinates": marker.coordinates,
             "data-icon": (marker.icon ?? C.marker.default.icon).replace("lucide-", ""),
             "data-colour": marker.colour ?? C.marker.default.colour,
