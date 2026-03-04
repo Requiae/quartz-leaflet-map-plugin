@@ -97,7 +97,7 @@ Obsidian doesn't support nested YAML via the Note Properties plugin ([source](ht
 
 ### If you use Quartz Syncer and your markers don't show up
 
-Chances are that your Syncer settings do include all frontmatter/note properties. Try enabling the setting in Quartz Syncer to include all frontmatter/note properties.
+Chances are that your Syncer settings don't include all frontmatter/note properties. Try enabling the setting in Quartz Syncer to include all frontmatter/note properties.
 
 ## Credits
 
