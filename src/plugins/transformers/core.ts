@@ -38,6 +38,10 @@ interface MapObject {
 
 type ValidatorFunction<T> = (value: unknown) => value is T;
 
+interface LeafletMapPluginOptions {
+    enableCopyTool?: boolean;
+}
+
 /**
  * CONSTANTS.TS
  */
@@ -115,12 +119,14 @@ function stringValidator(value: unknown): value is string {
 }
 
 function sourcevalidator(value: unknown): value is string | Wiki {
-    const preparedValue = typeof value === "string" ? value : value?.toString();
-    return !!preparedValue;
+    if (stringValidator(value)) return value.length > 0;
+    if (Array.isArray(value) && Array.isArray(value[0]) && stringValidator(value[0][0]))
+        return value[0][0].length > 0;
+    return false;
 }
 
 function numberValidator(value: unknown): value is number {
-    return Number.isFinite(value);
+    return typeof value === "number" && isFinite(value) && !isNaN(value);
 }
 
 function positiveNumberValidator(value: unknown): value is number {
@@ -169,12 +175,12 @@ const markerSchema: Schema<keyof MarkerObject> = {
 const mapSchema: Schema<keyof MapObject> = {
     name: { validator: Validator.string },
     image: { validator: Validator.source, required: true },
-    height: { validator: Validator.number },
+    height: { validator: Validator.positiveNumber },
     minZoom: { validator: Validator.number },
     maxZoom: { validator: Validator.number },
     defaultZoom: { validator: Validator.number },
     zoomDelta: { validator: Validator.positiveNumber },
-    scale: { validator: Validator.number },
+    scale: { validator: Validator.positiveNumber },
     unit: { validator: Validator.string },
 };
 
@@ -346,7 +352,12 @@ function parseMapFromNode(node: ExtendedNode): MapObject | undefined {
         .at(0);
 }
 
-function buildMapData(ctx: BuildCtx, file: VFile, node: ExtendedNode): Element | undefined {
+function buildMapData(
+    ctx: BuildCtx,
+    options: LeafletMapPluginOptions,
+    file: VFile,
+    node: ExtendedNode,
+): Element | undefined {
     const mapData = parseMapFromNode(node);
     if (!mapData) return;
 
@@ -384,6 +395,7 @@ function buildMapData(ctx: BuildCtx, file: VFile, node: ExtendedNode): Element |
                     "data-zoom-delta": mapData.zoomDelta ?? C.map.default.zoomDelta,
                     "data-scale": mapData.scale ?? C.map.default.scale,
                     "data-unit": mapData.unit ?? C.map.default.unit,
+                    "data-enable-copy-tool": options.enableCopyTool ?? false,
                 },
                 children: markers.map((marker) => buildMarkerElement(marker, currentSlug, minZoom)),
             },
@@ -391,7 +403,12 @@ function buildMapData(ctx: BuildCtx, file: VFile, node: ExtendedNode): Element |
     };
 }
 
-function transformMapElement(ctx: BuildCtx, tree: Root, file: VFile): void {
+function transformMapElement(
+    ctx: BuildCtx,
+    options: LeafletMapPluginOptions,
+    tree: Root,
+    file: VFile,
+): void {
     visit(
         tree,
         { tagName: "code" },
@@ -400,7 +417,7 @@ function transformMapElement(ctx: BuildCtx, tree: Root, file: VFile): void {
                 return;
             }
 
-            const leafletElement = buildMapData(ctx, file, node);
+            const leafletElement = buildMapData(ctx, options, file, node);
             if (!leafletElement) return;
 
             // Replace the codeblock with the leaflet element
@@ -413,7 +430,7 @@ function transformMapElement(ctx: BuildCtx, tree: Root, file: VFile): void {
  * CORE.TS
  */
 
-export const LeafletMap: QuartzTransformerPlugin = () => ({
+export const LeafletMap: QuartzTransformerPlugin<LeafletMapPluginOptions> = (options) => ({
     name: "LeafletMapPlugin",
     markdownPlugins() {
         return [
@@ -427,7 +444,8 @@ export const LeafletMap: QuartzTransformerPlugin = () => ({
     htmlPlugins(ctx) {
         return [
             () => {
-                return (tree: Root, file: VFile) => transformMapElement(ctx, tree, file);
+                return (tree: Root, file: VFile) =>
+                    transformMapElement(ctx, options ?? {}, tree, file);
             },
         ];
     },

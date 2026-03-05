@@ -22,6 +22,7 @@ declare namespace lucide {
     const icons: Icons;
     const Ruler: IconNode;
     const MousePointer2: IconNode;
+    const Pin: IconNode;
 }
 
 type Coordinates = `${number}, ${number}`;
@@ -44,6 +45,7 @@ interface MapDataSet {
     zoomDelta: string;
     scale: string;
     unit: string;
+    enableCopyTool: string;
 }
 
 /**
@@ -60,6 +62,7 @@ const C = {
             height: "600",
             scale: "1",
             unit: "",
+            enableCopyTool: "false",
         },
     },
 } as const;
@@ -69,20 +72,33 @@ const C = {
  */
 
 function isNonEmptyObject(value: unknown): value is { [key: string]: string } {
-    if (!value || typeof value !== "object") return false;
+    if (!value || typeof value !== "object" || Array.isArray(value)) return false;
     return (
         Object.keys(value).length > 0 &&
         Object.values(value).every((value) => typeof value === "string")
     );
 }
 
-function parseCoordinates(coordinates: Coordinates): [number, number] {
+function parseCoordinates(coordinates: Coordinates): L.LatLngTuple {
     const parsedCoordinates = coordinates
         .replace(/\s/g, "")
         .split(",")
         .map((coordinate) => parseInt(coordinate));
-    if (parsedCoordinates.length !== 2) throw new Error("Coordinates not properly validated");
-    return parsedCoordinates as [number, number];
+
+    if (!isLatLngTuple(parsedCoordinates)) {
+        throw new Error("Coordinates not properly validated");
+    }
+
+    return parsedCoordinates;
+}
+
+function isLatLngTuple(value: unknown): value is L.LatLngTuple {
+    return (
+        !!value &&
+        Array.isArray(value) &&
+        value.length === 2 &&
+        value.every((value) => typeof value === "number" && !isNaN(value))
+    );
 }
 
 function createIcons(element: Element): void {
@@ -402,18 +418,66 @@ class MeasureControl extends SubControl {
     }
 }
 
+class CopyControl extends SubControl {
+    private previewTooltip: L.Tooltip | undefined;
+    override onAdded(): void {
+        if (this.button) {
+            this.button.appendChild(lucide.createElement(lucide.Pin));
+            this.button.ariaLabel = "Copy";
+        }
+        this.previewTooltip = L.tooltip({ permanent: true, offset: [15, 0] }).setLatLng([0, 0]);
+    }
+
+    override onSelected(): void {
+        this.map.getContainer().style.cursor = "crosshair";
+        this.map.on("mousemove", (event) => {
+            this.renderPreview(event.latlng);
+        });
+        this.previewTooltip?.addTo(this.map);
+    }
+
+    override onDeselected(): void {
+        this.map.getContainer().style.cursor = "";
+        this.map.removeEventListener("mousemove");
+        this.previewTooltip?.remove();
+    }
+
+    override mapClicked(event: L.LeafletMouseEvent): void {
+        void navigator.clipboard.writeText(this.getContent(event.latlng));
+    }
+
+    private renderPreview(mouseCoordinate: L.LatLng): void {
+        this.previewTooltip
+            ?.setContent(this.getContent(mouseCoordinate))
+            .setLatLng(mouseCoordinate);
+    }
+
+    private getContent(coordinate: L.LatLng): string {
+        return `${Math.round(coordinate.lat)}, ${Math.round(coordinate.lng)}`;
+    }
+}
+
+interface ControlContainerOptions {
+    enableCopyTool: boolean;
+}
+
+const DefaultControlContainerOptions: ControlContainerOptions = { enableCopyTool: false };
+
 class ControlContainer extends L.Control {
     // Do not remove individual elements, each element has a ref to it's own index
     private controls: SubControl[] = [];
     private activeIndex: number = 0;
+    private settings: ControlContainerOptions;
 
-    constructor() {
+    constructor(options: ControlContainerOptions) {
         super({ position: "topleft" });
+        this.settings = { ...DefaultControlContainerOptions, ...options };
     }
 
     override onAdd(map: L.Map): HTMLElement {
         this.registerSubControl(PanControl, map);
         this.registerSubControl(MeasureControl, map);
+        if (this.settings.enableCopyTool) this.registerSubControl(CopyControl, map);
 
         const containerEl = L.DomUtil.create("div", "leaflet-bar leaflet-control");
 
@@ -508,7 +572,7 @@ async function initialiseMap(
         zoomDelta: parseFloat(dataset.zoomDelta),
     });
 
-    const controls = new ControlContainer();
+    const controls = new ControlContainer({ enableCopyTool: dataset.enableCopyTool === "true" });
     controls.addTo(mapItem);
     controls.updateSettings(dataset);
 

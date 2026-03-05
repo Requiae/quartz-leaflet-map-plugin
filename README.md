@@ -18,6 +18,7 @@ Ensure you have a release tagged for Quartz v4
 - Add file `leafletMapPlugin.ts` to your `quartz\plugins\transformers\`
 - Append line `export { LeafletMap } from "./leafletMapPlugin"` to your `quartz\plugins\transformers\index.ts`
 - Place line `Plugin.LeafletMap(),` to your `quartz.config.ts` in the end of `plugins: { transformers:` section
+    - Optional: To enable the copy tool from the Obsidian plugin, add `Plugin.LeafletMap({ enableCopyTool: true }),` instead
 
 ## How to use
 
