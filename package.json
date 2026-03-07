@@ -55,13 +55,13 @@
     }
   },
   "dependencies": {
-    "@quartz-community/bases-page": "github:quartz-community/bases-page",
     "sass": "^1.97.3",
     "sass-embedded": "^1.97.3",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@quartz-community/bases-page": "github:quartz-community/bases-page",
     "@types/leaflet": "^1.9.12",
     "@types/node": "^24.10.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
