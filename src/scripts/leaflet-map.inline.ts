@@ -468,61 +468,71 @@ interface ControlContainerOptions {
 
 const DefaultControlContainerOptions: ControlContainerOptions = { enableCopyTool: false };
 
-class ControlContainer extends L.Control {
-  private controls: SubControl[] = [];
-  private activeIndex: number = 0;
-  private settings: ControlContainerOptions;
+// Lazily define ControlContainer after Leaflet is loaded (L.Control is unavailable at parse time)
+let _ControlContainer: typeof L.Control | null = null;
 
-  constructor(options: ControlContainerOptions) {
-    super({ position: "topleft" });
-    this.settings = { ...DefaultControlContainerOptions, ...options };
-  }
+function getControlContainerClass() {
+  if (_ControlContainer) return _ControlContainer;
 
-  override onAdd(map: import("leaflet").Map): HTMLElement {
-    this.registerSubControl(PanControl, map);
-    this.registerSubControl(MeasureControl, map);
-    if (this.settings.enableCopyTool) this.registerSubControl(CopyControl, map);
+  class ControlContainer extends L.Control {
+    private controls: SubControl[] = [];
+    private activeIndex: number = 0;
+    private settings: ControlContainerOptions;
 
-    const containerEl = L.DomUtil.create("div", "leaflet-bar leaflet-control");
-
-    for (const control of this.controls) {
-      control.onAdd(containerEl);
+    constructor(options: ControlContainerOptions) {
+      super({ position: "topleft" });
+      this.settings = { ...DefaultControlContainerOptions, ...options };
     }
-    this.controls[this.activeIndex]?.setSelected(true);
 
-    map.on("click", (event: import("leaflet").LeafletMouseEvent) => {
+    override onAdd(map: import("leaflet").Map): HTMLElement {
+      this.registerSubControl(PanControl, map);
+      this.registerSubControl(MeasureControl, map);
+      if (this.settings.enableCopyTool) this.registerSubControl(CopyControl, map);
+
+      const containerEl = L.DomUtil.create("div", "leaflet-bar leaflet-control");
+
       for (const control of this.controls) {
-        if (control.isSelected) control.mapClicked(event);
+        control.onAdd(containerEl);
       }
-    });
+      this.controls[this.activeIndex]?.setSelected(true);
 
-    return containerEl;
-  }
+      map.on("click", (event: import("leaflet").LeafletMouseEvent) => {
+        for (const control of this.controls) {
+          if (control.isSelected) control.mapClicked(event);
+        }
+      });
 
-  override onRemove(map: import("leaflet").Map | undefined): void {
-    map?.removeEventListener("click");
-
-    for (const control of this.controls) {
-      control.onRemove();
+      return containerEl;
     }
-    this.controls = [];
-  }
 
-  updateSettings(options: MapDataSet): void {
-    for (const control of this.controls) {
-      control.updateSettings(options);
+    override onRemove(map: import("leaflet").Map | undefined): void {
+      map?.removeEventListener("click");
+
+      for (const control of this.controls) {
+        control.onRemove();
+      }
+      this.controls = [];
+    }
+
+    updateSettings(options: MapDataSet): void {
+      for (const control of this.controls) {
+        control.updateSettings(options);
+      }
+    }
+
+    private registerSubControl(control: typeof SubControl, map: import("leaflet").Map): void {
+      const onSelectCallback = (controlIndex: number) => {
+        this.controls.at(this.activeIndex)?.setSelected(false);
+        this.controls.at(controlIndex)?.setSelected(true);
+        this.activeIndex = controlIndex;
+      };
+      const options = { index: this.controls.length, map, onSelectCallback };
+      this.controls.push(new control(options));
     }
   }
 
-  private registerSubControl(control: typeof SubControl, map: import("leaflet").Map): void {
-    const onSelectCallback = (controlIndex: number) => {
-      this.controls.at(this.activeIndex)?.setSelected(false);
-      this.controls.at(controlIndex)?.setSelected(true);
-      this.activeIndex = controlIndex;
-    };
-    const options = { index: this.controls.length, map, onSelectCallback };
-    this.controls.push(new control(options));
-  }
+  _ControlContainer = ControlContainer as unknown as typeof L.Control;
+  return _ControlContainer;
 }
 
 function isMapDataSet(dataset: unknown): dataset is MapDataSet {
@@ -578,7 +588,8 @@ async function initialiseMap(
     zoomDelta: parseFloat(dataset.zoomDelta),
   });
 
-  const controls = new ControlContainer({ enableCopyTool: dataset.enableCopyTool === "true" });
+  const ControlContainer = getControlContainerClass();
+  const controls = new ControlContainer({ enableCopyTool: dataset.enableCopyTool === "true" }) as InstanceType<typeof L.Control> & { updateSettings(options: MapDataSet): void };
   controls.addTo(mapItem);
   controls.updateSettings(dataset);
 
