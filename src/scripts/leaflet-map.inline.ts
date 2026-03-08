@@ -61,24 +61,36 @@ const C = {
   },
 } as const;
 
+async function loadScript(urls: string[]): Promise<void> {
+  for (const url of urls) {
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = url;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Failed to load: ${url}`));
+        document.head.appendChild(script);
+      });
+      return;
+    } catch {
+      // Try next URL
+    }
+  }
+  throw new Error(`All CDN sources failed for: ${urls.join(", ")}`);
+}
+
 async function loadDependencies(): Promise<void> {
   if (typeof L === "undefined") {
-    await new Promise<void>((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-      script.onload = () => resolve();
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
+    await loadScript([
+      "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js",
+      "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
+    ]);
   }
   if (typeof lucide === "undefined") {
-    await new Promise<void>((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = "https://unpkg.com/lucide@0.575.0";
-      script.onload = () => resolve();
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
+    await loadScript([
+      "https://cdn.jsdelivr.net/npm/lucide@0.575.0/dist/umd/lucide.min.js",
+      "https://unpkg.com/lucide@0.575.0",
+    ]);
   }
 }
 
@@ -608,8 +620,19 @@ function cleanupMap(mapItem: import("leaflet").Map | undefined) {
 }
 
 document.addEventListener("nav", async () => {
-  await loadDependencies();
   const maps: NodeListOf<HTMLElement> = document.querySelectorAll("div.leaflet-map");
+  if (maps.length === 0) return;
+
+  try {
+    await loadDependencies();
+  } catch (err) {
+    console.error("[leaflet-map] Failed to load dependencies:", err);
+    for (const map of Array.from(maps)) {
+      map.textContent = "Failed to load map dependencies. Check your browser's content blocking settings.";
+    }
+    return;
+  }
+
   for (const map of Array.from(maps)) {
     const markerData = getMarkerData(map);
     const mapItem = await initialiseMap(map, markerData);
