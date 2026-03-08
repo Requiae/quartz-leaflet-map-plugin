@@ -3,6 +3,8 @@ import type {
   ViewRendererProps,
   ViewTypeRegistration,
 } from "@quartz-community/bases-page";
+import { transformLink } from "@quartz-community/bases-page";
+import type { FullSlug } from "@quartz-community/bases-page";
 import leafletMapCss from "./styles/leaflet-map.scss";
 import leafletMapScript from "./scripts/leaflet-map.inline";
 import { DEFAULTS } from "./types";
@@ -28,13 +30,19 @@ const toNumber = (value: unknown): number | undefined => {
 const getString = (value: unknown): string | undefined =>
   typeof value === "string" && value.trim().length > 0 ? value : undefined;
 
-const leafletMapRenderer: ViewRenderer = ({ entries, view }: ViewRendererProps) => {
+const leafletMapRenderer: ViewRenderer = ({ entries, view, slug, allSlugs, linkResolution }: ViewRendererProps) => {
   const mapName = getString(view.mapName);
-  const imageSource = getString(view.image);
+  const rawImage = getString(view.image);
 
-  if (!imageSource) {
+  if (!rawImage) {
     return <div>Leaflet map view requires an image.</div>;
   }
+
+  const imageSource = transformLink(
+    slug as FullSlug,
+    rawImage,
+    { strategy: linkResolution, allSlugs: allSlugs as FullSlug[] },
+  );
 
   const minZoom = toNumber(view.minZoom) ?? DEFAULTS.minZoom;
   const maxZoom = Math.max(toNumber(view.maxZoom) ?? DEFAULTS.maxZoom, minZoom);
