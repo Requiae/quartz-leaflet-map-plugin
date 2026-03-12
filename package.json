@@ -1,93 +1,93 @@
 {
-  "name": "quartz-leaflet-map-plugin",
-  "version": "2.0.0",
-  "description": "Leaflet map Bases view plugin for Quartz v5. Renders interactive maps with markers from note frontmatter.",
-  "type": "module",
-  "license": "MIT",
-  "author": "Quartz Community",
-  "homepage": "https://quartz.jzhao.xyz",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/quartz-community/quartz-leaflet-map-plugin"
-  },
-  "keywords": [
-    "quartz",
-    "quartz-plugin",
-    "leaflet",
-    "bases",
-    "view"
-  ],
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE",
-    "CHANGELOG.md"
-  ],
-  "exports": {
-    ".": "./dist/index.js"
-  },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "sideEffects": false,
-  "scripts": {
-    "build": "tsup",
-    "prepare": "npm run build",
-    "dev": "tsup --watch",
-    "lint": "eslint . --max-warnings=0",
-    "format": "prettier . --check",
-    "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm run lint && npm run format"
-  },
-  "peerDependencies": {
-    "@jackyzha0/quartz": "^5.0.0",
-    "@quartz-community/bases-page": "^0.1.0",
-    "preact": "^10.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@jackyzha0/quartz": {
-      "optional": true
+    "name": "quartz-leaflet-map-plugin",
+    "version": "2.0.0",
+    "description": "Leaflet map Bases view plugin for Quartz v5. Renders interactive maps with markers from note frontmatter.",
+    "type": "module",
+    "license": "MIT",
+    "author": "Quartz Community",
+    "homepage": "https://quartz.jzhao.xyz",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/quartz-community/quartz-leaflet-map-plugin"
     },
-    "@quartz-community/bases-page": {
-      "optional": false
-    },
-    "preact": {
-      "optional": false
-    }
-  },
-  "dependencies": {
-    "sass": "^1.97.3",
-    "sass-embedded": "^1.97.3",
-    "tsup": "^8.5.0",
-    "typescript": "^5.9.3"
-  },
-  "devDependencies": {
-    "@quartz-community/bases-page": "github:quartz-community/bases-page",
-    "@quartz-community/types": "github:quartz-community/types",
-    "@quartz-community/utils": "github:quartz-community/utils",
-    "@types/leaflet": "^1.9.12",
-    "@types/node": "^24.10.0",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "preact": "^10.28.2",
-    "prettier": "^3.6.2"
-  },
-  "quartz": {
-    "name": "leaflet-map",
-    "displayName": "Leaflet Map",
-    "category": [
-      "component"
+    "keywords": [
+        "quartz",
+        "quartz-plugin",
+        "leaflet",
+        "bases",
+        "view"
     ],
-    "version": "1.0.0",
-    "quartzVersion": ">=5.0.0",
-    "dependencies": [],
-    "defaultOrder": 50,
-    "defaultEnabled": true,
-    "defaultOptions": {}
-  },
-  "engines": {
-    "node": ">=22",
-    "npm": ">=10.9.2"
-  }
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE",
+        "CHANGELOG.md"
+    ],
+    "exports": {
+        ".": "./dist/index.js"
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "sideEffects": false,
+    "scripts": {
+        "build": "tsup",
+        "prepare": "npm run build",
+        "dev": "tsup --watch",
+        "lint": "eslint . --max-warnings=0",
+        "format": "prettier . --check",
+        "typecheck": "tsc --noEmit",
+        "check": "npm run typecheck && npm run lint && npm run format"
+    },
+    "peerDependencies": {
+        "@jackyzha0/quartz": "^5.0.0",
+        "@quartz-community/bases-page": "^0.1.0",
+        "preact": "^10.0.0"
+    },
+    "peerDependenciesMeta": {
+        "@jackyzha0/quartz": {
+            "optional": true
+        },
+        "@quartz-community/bases-page": {
+            "optional": false
+        },
+        "preact": {
+            "optional": false
+        }
+    },
+    "dependencies": {
+        "sass": "^1.97.3",
+        "sass-embedded": "^1.97.3",
+        "tsup": "^8.5.0",
+        "typescript": "^5.9.3"
+    },
+    "devDependencies": {
+        "@quartz-community/bases-page": "github:quartz-community/bases-page",
+        "@quartz-community/types": "github:quartz-community/types",
+        "@quartz-community/utils": "github:quartz-community/utils",
+        "@types/leaflet": "^1.9.12",
+        "@types/node": "^24.10.0",
+        "@typescript-eslint/eslint-plugin": "^7.18.0",
+        "@typescript-eslint/parser": "^7.18.0",
+        "eslint": "^8.57.0",
+        "eslint-config-prettier": "^9.1.0",
+        "preact": "^10.28.2",
+        "prettier": "^3.6.2"
+    },
+    "quartz": {
+        "name": "leaflet-map",
+        "displayName": "Leaflet Map",
+        "category": [
+            "component"
+        ],
+        "version": "1.0.0",
+        "quartzVersion": ">=5.0.0",
+        "dependencies": [],
+        "defaultOrder": 50,
+        "defaultEnabled": true,
+        "defaultOptions": {}
+    },
+    "engines": {
+        "node": ">=22",
+        "npm": ">=10.9.2"
+    }
 }
