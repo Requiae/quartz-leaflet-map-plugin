@@ -1,33 +1,33 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "lib": ["ES2022", "DOM"],
-    "rootDir": ".",
-    "outDir": "dist",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "noEmit": true,
-    "strict": true,
-    "noImplicitOverride": true,
-    "noUncheckedIndexedAccess": true,
-    "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "types": ["node"],
-    "verbatimModuleSyntax": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact"
-  },
-  "include": [
-    "src/index.ts",
-    "src/view.tsx",
-    "src/types.ts",
-    "src/scripts/**/*.ts",
-    "src/**/*.d.ts",
-    "tsup.config.ts"
-  ],
-  "exclude": ["dist", "node_modules", "src/plugins", "src/util", "src/build.ts"]
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "lib": ["ES2022", "DOM"],
+        "rootDir": ".",
+        "outDir": "dist",
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "noEmit": true,
+        "strict": true,
+        "noImplicitOverride": true,
+        "noUncheckedIndexedAccess": true,
+        "noFallthroughCasesInSwitch": true,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "types": ["node"],
+        "verbatimModuleSyntax": true,
+        "jsx": "react-jsx",
+        "jsxImportSource": "preact"
+    },
+    "include": [
+        "src/index.ts",
+        "src/view.tsx",
+        "src/types.ts",
+        "src/scripts/**/*.ts",
+        "src/**/*.d.ts",
+        "tsup.config.ts"
+    ],
+    "exclude": ["dist", "node_modules", "src/plugins", "src/util", "src/build.ts"]
 }
