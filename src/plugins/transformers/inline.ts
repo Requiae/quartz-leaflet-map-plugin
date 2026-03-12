@@ -594,11 +594,14 @@ function cleanupMap(mapItem: L.Map | undefined) {
     mapItem?.remove();
 }
 
-document.addEventListener("nav", async () => {
+async function initializeLeafletMaps() {
     const maps: NodeListOf<HTMLElement> = document.querySelectorAll("div.leaflet-map");
     maps.forEach(async (map) => {
         const markerData = getMarkerData(map);
         const mapItem = await initialiseMap(map, markerData);
         window.addCleanup(() => cleanupMap(mapItem));
     });
-});
+}
+
+document.addEventListener("nav", initializeLeafletMaps);
+document.addEventListener("render", initializeLeafletMaps);

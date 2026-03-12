@@ -625,7 +625,7 @@ function cleanupMap(mapItem: import("leaflet").Map | undefined) {
     mapItem?.remove();
 }
 
-document.addEventListener("nav", async () => {
+async function initializeLeafletMaps() {
     const maps: NodeListOf<HTMLElement> = document.querySelectorAll("div.leaflet-map");
     if (maps.length === 0) return;
 
@@ -645,6 +645,9 @@ document.addEventListener("nav", async () => {
         const mapItem = await initialiseMap(map, markerData);
         window.addCleanup(() => cleanupMap(mapItem));
     }
-});
+}
+
+document.addEventListener("nav", initializeLeafletMaps);
+document.addEventListener("render", initializeLeafletMaps);
 
 export default "";
