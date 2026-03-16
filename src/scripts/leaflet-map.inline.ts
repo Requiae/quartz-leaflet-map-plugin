@@ -486,6 +486,7 @@ class CopyControl extends SubControl {
 
 interface ControlContainerOptions extends ControlOptions {
     enableCopyTool: boolean;
+    position?: "topleft" | undefined;
 }
 
 const DefaultControlContainerOptions: ControlContainerOptions = { enableCopyTool: false };
