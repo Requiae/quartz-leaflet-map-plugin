@@ -1,6 +1,4 @@
-import { ViewTypeRegistration } from '@quartz-community/bases-page';
-
-declare const leafletMapViewRegistration: ViewTypeRegistration;
+import { ViewTypeRegistration } from "@quartz-community/bases-page";
 
 interface LeafletMapViewConfig {
     mapName?: string;
@@ -13,6 +11,9 @@ interface LeafletMapViewConfig {
     scale?: number;
     unit?: string;
 }
+interface LeafletMapPluginOptions {
+    enableCopyTool?: boolean;
+}
 interface MarkerData {
     mapName?: string;
     coordinates: string;
@@ -21,4 +22,20 @@ interface MarkerData {
     minZoom?: number;
 }
 
-export { type LeafletMapViewConfig, type MarkerData, leafletMapViewRegistration };
+declare const leafletMapViewRegistration: ViewTypeRegistration;
+
+declare function registerLeafletMap(userOpts?: Partial<LeafletMapPluginOptions>): void;
+/**
+ * Called by Quartz's config-loader with merged options from
+ * `quartz.config.yaml` and `package.json` defaultOptions.
+ */
+declare function init(options?: Record<string, unknown>): void;
+
+export {
+    type LeafletMapPluginOptions,
+    type LeafletMapViewConfig,
+    type MarkerData,
+    init,
+    leafletMapViewRegistration,
+    registerLeafletMap,
+};
