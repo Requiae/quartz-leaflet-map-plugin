@@ -1,14 +1,14 @@
 {
-    "name": "quartz-leaflet-map-plugin",
+    "name": "quartz-leaflet-bases-plugin",
     "version": "2.0.0",
     "description": "Leaflet map Bases view plugin for Quartz v5. Renders interactive maps with markers from note frontmatter.",
     "type": "module",
     "license": "MIT",
-    "author": "Quartz Community",
-    "homepage": "https://quartz.jzhao.xyz",
+    "author": "Sara Lilith Slootmaker",
+    "homepage": "https://requiae.github.io/quartz-leaflet-map-plugin-demo/",
     "repository": {
         "type": "git",
-        "url": "https://github.com/quartz-community/quartz-leaflet-map-plugin"
+        "url": "https://github.com/quartz-community/quartz-leaflet-bases-plugin"
     },
     "keywords": [
         "quartz",
