@@ -83,7 +83,9 @@
         "dependencies": [],
         "defaultOrder": 50,
         "defaultEnabled": true,
-        "defaultOptions": {}
+        "defaultOptions": {
+            "enableCopyTool": false
+        }
     },
     "engines": {
         "node": ">=22",

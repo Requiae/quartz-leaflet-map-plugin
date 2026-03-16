@@ -1,9 +1,7 @@
-export declare global {
-    interface Window {
-        addCleanup(fn: (...args: unknown[]) => void);
-    }
+export {};
 
-    interface ControlOptions {
-        enableCopyTool: boolean;
+declare global {
+    interface Window {
+        addCleanup(fn: () => void): void;
     }
 }

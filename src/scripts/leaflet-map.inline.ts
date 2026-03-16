@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
-
 declare const L: typeof import("leaflet");
 
 type LatLng = import("leaflet").LatLng;
@@ -28,6 +26,7 @@ interface CreateIconsOptions {
     inTemplates?: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace lucide {
     const createElement: (icon: IconNode) => HTMLElement;
     const createIcons: ({ icons, nameAttr, attrs, root, inTemplates }?: CreateIconsOptions) => void;
@@ -492,9 +491,12 @@ interface ControlContainerOptions extends ControlOptions {
 const DefaultControlContainerOptions: ControlContainerOptions = { enableCopyTool: false };
 
 // Lazily define ControlContainer after Leaflet is loaded (L.Control is unavailable at parse time)
-let _ControlContainer: typeof L.Control<ControlContainerOptions> | null = null;
+type ControlContainerClass = new (options: ControlContainerOptions) => L.Control & {
+    updateSettings(options: MapDataSet): void;
+};
+let _ControlContainer: ControlContainerClass | null = null;
 
-function getControlContainerClass() {
+function getControlContainerClass(): ControlContainerClass {
     if (_ControlContainer) return _ControlContainer;
 
     class ControlContainer extends L.Control {
@@ -554,7 +556,7 @@ function getControlContainerClass() {
         }
     }
 
-    _ControlContainer = ControlContainer as unknown as typeof L.Control;
+    _ControlContainer = ControlContainer as unknown as ControlContainerClass;
     return _ControlContainer;
 }
 
@@ -614,9 +616,7 @@ async function initialiseMap(
     const ControlContainer = getControlContainerClass();
     const controls = new ControlContainer({
         enableCopyTool: dataset.enableCopyTool === "true",
-    }) as InstanceType<typeof L.Control<ControlContainerOptions>> & {
-        updateSettings(options: MapDataSet): void;
-    };
+    });
     controls.addTo(mapItem);
     controls.updateSettings(dataset);
 
@@ -634,7 +634,7 @@ function cleanupMap(mapItem: Map | undefined) {
     mapItem?.remove();
 }
 
-document.addEventListener("nav", async () => {
+async function initializeLeafletMaps() {
     const maps: NodeListOf<HTMLElement> = document.querySelectorAll("div.leaflet-map");
     if (maps.length === 0) return;
 
@@ -654,6 +654,9 @@ document.addEventListener("nav", async () => {
         const mapItem = await initialiseMap(map, markerData);
         window.addCleanup(() => cleanupMap(mapItem));
     }
-});
+}
+
+document.addEventListener("nav", initializeLeafletMaps);
+document.addEventListener("render", initializeLeafletMaps);
 
 export default "";

@@ -10,6 +10,14 @@ export interface LeafletMapViewConfig {
     unit?: string;
 }
 
+export interface LeafletMapPluginOptions {
+    enableCopyTool?: boolean;
+}
+
+export const defaultOptions: LeafletMapPluginOptions = {
+    enableCopyTool: false,
+};
+
 export interface MarkerData {
     mapName?: string;
     coordinates: string;
