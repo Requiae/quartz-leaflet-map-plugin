@@ -618,9 +618,7 @@ async function initialiseMap(
     const ControlContainer = getControlContainerClass();
     const controls = new ControlContainer({
         enableCopyTool: dataset.enableCopyTool === "true",
-    }) as InstanceType<typeof L.Control<ControlContainerOptions>> & {
-        updateSettings(options: MapDataSet): void;
-    };
+    });
     controls.addTo(mapItem);
     controls.updateSettings(dataset);
 
