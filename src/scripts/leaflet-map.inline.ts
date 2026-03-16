@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
-
 declare const L: typeof import("leaflet");
 
 type LatLng = import("leaflet").LatLng;
@@ -488,6 +486,7 @@ class CopyControl extends SubControl {
 
 interface ControlContainerOptions extends ControlOptions {
     enableCopyTool: boolean;
+    position?: "topleft" | undefined;
 }
 
 const DefaultControlContainerOptions: ControlContainerOptions = { enableCopyTool: false };
