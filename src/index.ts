@@ -14,4 +14,12 @@ export function registerLeafletMap(userOpts?: Partial<LeafletMapPluginOptions>):
     });
 }
 
+/**
+ * Called by Quartz's config-loader with merged options from
+ * `quartz.config.yaml` and `package.json` defaultOptions.
+ */
+export function init(options?: Record<string, unknown>): void {
+    registerLeafletMap(options as Partial<LeafletMapPluginOptions> | undefined);
+}
+
 viewRegistry.register(leafletMapViewRegistration);

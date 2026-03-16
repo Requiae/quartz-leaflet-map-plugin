@@ -9,6 +9,34 @@ A live demo can be found [here](https://requiae.github.io/quartz-leaflet-map-plu
 
 ## How to add it to your quartz
 
+### Quartz v5
+
+Add the plugin to the `plugins` list in your `quartz.config.yaml`:
+
+```yaml
+plugins:
+    - source: github:quartz-community/external-quartz-leaflet-map-plugin
+      enabled: true
+```
+
+This plugin also requires the [bases-page](https://github.com/quartz-community/bases-page) plugin.
+
+### Plugin Options
+
+You can pass options to the plugin via `quartz.config.yaml`:
+
+```yaml
+plugins:
+    - source: github:quartz-community/external-quartz-leaflet-map-plugin
+      enabled: true
+      options:
+          enableCopyTool: true
+```
+
+| Option         | Type    | Default | Description                                                   |
+| -------------- | ------- | ------- | ------------------------------------------------------------- |
+| enableCopyTool | boolean | `false` | Enables the copy tool from the Obsidian Leaflet Bases plugin. |
+
 ### Quartz v4
 
 > Quartz v4 does not have a bases implementation. As such it is highly recommended (read 'basically required') to use the `mapName` feature if your vault has multiple maps.
