@@ -2,6 +2,18 @@
 
 declare const L: typeof import("leaflet");
 
+type LatLng = import("leaflet").LatLng;
+type LatLngTuple = import("leaflet").LatLngTuple;
+type LatLngBoundsExpression = import("leaflet").LatLngBoundsExpression;
+type LeafletMouseEvent = import("leaflet").LeafletMouseEvent;
+type Polyline = import("leaflet").Polyline;
+type Tooltip = import("leaflet").Tooltip;
+type CircleMarker = import("leaflet").CircleMarker;
+type LayerGroup = import("leaflet").LayerGroup;
+type Map = import("leaflet").Map;
+type Marker = import("leaflet").Marker;
+type ControlOptions = import("leaflet").ControlOptions;
+
 type SVGProps = Record<string, string | number | undefined> | { class: string[] };
 type IconNode = [tag: string, attrs: SVGProps][];
 type Icons = {
@@ -104,7 +116,7 @@ function isNonEmptyObject(value: unknown): value is { [key: string]: string } {
     );
 }
 
-function parseCoordinates(coordinates: Coordinates): import("leaflet").LatLngTuple {
+function parseCoordinates(coordinates: Coordinates): LatLngTuple {
     const parsedCoordinates = coordinates
         .replace(/\s/g, "")
         .split(",")
@@ -117,7 +129,7 @@ function parseCoordinates(coordinates: Coordinates): import("leaflet").LatLngTup
     return parsedCoordinates;
 }
 
-function isLatLngTuple(value: unknown): value is import("leaflet").LatLngTuple {
+function isLatLngTuple(value: unknown): value is LatLngTuple {
     return (
         !!value &&
         Array.isArray(value) &&
@@ -135,7 +147,7 @@ function createIcons(element: Element): void {
     });
 }
 
-function distance(a: import("leaflet").LatLng, b: import("leaflet").LatLng): number {
+function distance(a: LatLng, b: LatLng): number {
     const square = (value: number) => value * value;
     return Math.sqrt(square(a.lat - b.lat) + square(a.lng - b.lng));
 }
@@ -186,12 +198,8 @@ function buildMarkerIcon(link: string, icon: string, colour: string) {
     });
 }
 
-function addMarker(markerData: MarkerDataSet, mapItem: import("leaflet").Map) {
-    function addMarkerWhenZoom(
-        markerItem: import("leaflet").Marker,
-        mapItem: import("leaflet").Map,
-        markerZoom: number,
-    ) {
+function addMarker(markerData: MarkerDataSet, mapItem: Map) {
+    function addMarkerWhenZoom(markerItem: Marker, mapItem: Map, markerZoom: number) {
         const tolerance = 0.00001;
         mapItem.getZoom() >= markerZoom - tolerance
             ? markerItem.addTo(mapItem)
@@ -212,13 +220,13 @@ function addMarker(markerData: MarkerDataSet, mapItem: import("leaflet").Map) {
 
 interface SubControlOptions {
     index: number;
-    map: import("leaflet").Map;
+    map: Map;
     onSelectCallback: (index: number) => void;
 }
 
 class SubControl {
     readonly index: number;
-    readonly map: import("leaflet").Map;
+    readonly map: Map;
 
     private onSelectCallback: (index: number) => void = () => {};
     protected button: HTMLDivElement | undefined;
@@ -276,7 +284,7 @@ class SubControl {
     protected onSelected(): void {}
     protected onDeselected(): void {}
 
-    mapClicked(_event: import("leaflet").LeafletMouseEvent): void {
+    mapClicked(_event: LeafletMouseEvent): void {
         throw new Error("Not implemented");
     }
 }
@@ -289,7 +297,7 @@ class PanControl extends SubControl {
         }
     }
 
-    override mapClicked(_event: import("leaflet").LeafletMouseEvent): void {}
+    override mapClicked(_event: LeafletMouseEvent): void {}
 }
 
 enum MeasureState {
@@ -301,15 +309,15 @@ enum MeasureState {
 
 class MeasureControl extends SubControl {
     private state: MeasureState = MeasureState.Ready;
-    private pathItems: import("leaflet").LatLng[] = [];
+    private pathItems: LatLng[] = [];
     private distance: number = 0;
 
-    private lineLayer: import("leaflet").LayerGroup | undefined;
-    private pointLayer: import("leaflet").LayerGroup | undefined;
-    private pathLine: import("leaflet").Polyline | undefined;
-    private previewLine: import("leaflet").Polyline | undefined;
-    private previewTooltip: import("leaflet").Tooltip | undefined;
-    private lastElement: import("leaflet").CircleMarker | undefined;
+    private lineLayer: LayerGroup | undefined;
+    private pointLayer: LayerGroup | undefined;
+    private pathLine: Polyline | undefined;
+    private previewLine: Polyline | undefined;
+    private previewTooltip: Tooltip | undefined;
+    private lastElement: CircleMarker | undefined;
 
     override onAdded(): void {
         if (this.button) {
@@ -327,7 +335,7 @@ class MeasureControl extends SubControl {
 
     override onSelected(): void {
         this.map.getContainer().style.cursor = "crosshair";
-        this.map.on("mousemove", (event: import("leaflet").LeafletMouseEvent) => {
+        this.map.on("mousemove", (event: LeafletMouseEvent) => {
             this.renderPreview(event.latlng);
         });
     }
@@ -339,7 +347,7 @@ class MeasureControl extends SubControl {
         this.state = MeasureState.Ready;
     }
 
-    override mapClicked(event: import("leaflet").LeafletMouseEvent): void {
+    override mapClicked(event: LeafletMouseEvent): void {
         if (!this.lineLayer) throw new Error("Line layer not initialised");
         switch (this.state) {
             case MeasureState.Ready:
@@ -380,7 +388,7 @@ class MeasureControl extends SubControl {
             distance(lastCoordinate, secondLastCoordinate) * parseFloat(this.options.scale);
     }
 
-    private renderPreview(mouseCoordinate: import("leaflet").LatLng): void {
+    private renderPreview(mouseCoordinate: LatLng): void {
         if (this.state !== MeasureState.Measuring) return;
 
         const lastCoordinate = this.pathItems.at(-1);
@@ -407,10 +415,7 @@ class MeasureControl extends SubControl {
         this.previewTooltip?.remove();
     }
 
-    private updatePolyline(
-        line: import("leaflet").Polyline | undefined,
-        coordinates: import("leaflet").LatLng[],
-    ): void {
+    private updatePolyline(line: Polyline | undefined, coordinates: LatLng[]): void {
         line?.setLatLngs(coordinates).redraw();
         line?.getElement()?.classList.remove("leaflet-interactive");
     }
@@ -420,11 +425,11 @@ class MeasureControl extends SubControl {
         this.lastElement?.getElement()?.classList.remove("leaflet-interactive");
     }
 
-    private getTooltip(permanent: boolean = false): import("leaflet").Tooltip {
+    private getTooltip(permanent: boolean = false): Tooltip {
         return L.tooltip({ permanent, offset: [15, 0] }).setContent(this.getContent(this.distance));
     }
 
-    private getCircleMarker(coordinate: import("leaflet").LatLng): import("leaflet").CircleMarker {
+    private getCircleMarker(coordinate: LatLng): CircleMarker {
         if (!this.pointLayer) throw new Error("Point layer not initialised");
         return L.circleMarker(coordinate, {
             radius: 4,
@@ -442,7 +447,7 @@ class MeasureControl extends SubControl {
 }
 
 class CopyControl extends SubControl {
-    private previewTooltip: import("leaflet").Tooltip | undefined;
+    private previewTooltip: Tooltip | undefined;
     override onAdded(): void {
         if (this.button) {
             this.button.appendChild(lucide.createElement(lucide.Pin));
@@ -453,7 +458,7 @@ class CopyControl extends SubControl {
 
     override onSelected(): void {
         this.map.getContainer().style.cursor = "crosshair";
-        this.map.on("mousemove", (event: import("leaflet").LeafletMouseEvent) => {
+        this.map.on("mousemove", (event: LeafletMouseEvent) => {
             this.renderPreview(event.latlng);
         });
         this.previewTooltip?.addTo(this.map);
@@ -465,30 +470,29 @@ class CopyControl extends SubControl {
         this.previewTooltip?.remove();
     }
 
-    override mapClicked(event: import("leaflet").LeafletMouseEvent): void {
+    override mapClicked(event: LeafletMouseEvent): void {
         void navigator.clipboard.writeText(this.getContent(event.latlng));
     }
 
-    private renderPreview(mouseCoordinate: import("leaflet").LatLng): void {
+    private renderPreview(mouseCoordinate: LatLng): void {
         this.previewTooltip
             ?.setContent(this.getContent(mouseCoordinate))
             .setLatLng(mouseCoordinate);
     }
 
-    private getContent(coordinate: import("leaflet").LatLng): string {
+    private getContent(coordinate: LatLng): string {
         return `${Math.round(coordinate.lat)}, ${Math.round(coordinate.lng)}`;
     }
 }
 
-interface ControlContainerOptions {
+interface ControlContainerOptions extends ControlOptions {
     enableCopyTool: boolean;
-    position?: "topleft" | undefined;
 }
 
 const DefaultControlContainerOptions: ControlContainerOptions = { enableCopyTool: false };
 
 // Lazily define ControlContainer after Leaflet is loaded (L.Control is unavailable at parse time)
-let _ControlContainer: typeof L.Control | null = null;
+let _ControlContainer: typeof L.Control<ControlContainerOptions> | null = null;
 
 function getControlContainerClass() {
     if (_ControlContainer) return _ControlContainer;
@@ -503,7 +507,7 @@ function getControlContainerClass() {
             this.settings = { ...DefaultControlContainerOptions, ...options };
         }
 
-        override onAdd(map: import("leaflet").Map): HTMLElement {
+        override onAdd(map: Map): HTMLElement {
             this.registerSubControl(PanControl, map);
             this.registerSubControl(MeasureControl, map);
             if (this.settings.enableCopyTool) this.registerSubControl(CopyControl, map);
@@ -515,7 +519,7 @@ function getControlContainerClass() {
             }
             this.controls[this.activeIndex]?.setSelected(true);
 
-            map.on("click", (event: import("leaflet").LeafletMouseEvent) => {
+            map.on("click", (event: LeafletMouseEvent) => {
                 for (const control of this.controls) {
                     if (control.isSelected) control.mapClicked(event);
                 }
@@ -524,7 +528,7 @@ function getControlContainerClass() {
             return containerEl;
         }
 
-        override onRemove(map: import("leaflet").Map | undefined): void {
+        override onRemove(map: Map | undefined): void {
             map?.removeEventListener("click");
 
             for (const control of this.controls) {
@@ -539,7 +543,7 @@ function getControlContainerClass() {
             }
         }
 
-        private registerSubControl(control: typeof SubControl, map: import("leaflet").Map): void {
+        private registerSubControl(control: typeof SubControl, map: Map): void {
             const onSelectCallback = (controlIndex: number) => {
                 this.controls.at(this.activeIndex)?.setSelected(false);
                 this.controls.at(controlIndex)?.setSelected(true);
@@ -583,7 +587,7 @@ async function getImageMeta(url: string): Promise<HTMLImageElement> {
 async function initialiseMap(
     mapElement: HTMLElement,
     markers: MarkerDataSet[],
-): Promise<import("leaflet").Map | undefined> {
+): Promise<Map | undefined> {
     const dataset = mapElement.dataset;
     if (!isMapDataSet(dataset)) {
         return;
@@ -593,7 +597,7 @@ async function initialiseMap(
 
     mapElement.style.aspectRatio = (image.naturalWidth / image.naturalHeight).toString();
 
-    const bounds: import("leaflet").LatLngBoundsExpression = [
+    const bounds: LatLngBoundsExpression = [
         [0, 0],
         [image.naturalHeight, image.naturalWidth],
     ];
@@ -608,7 +612,7 @@ async function initialiseMap(
     });
 
     const ControlContainer = getControlContainerClass();
-    const controls = new ControlContainer<ControlContainerOptions>({
+    const controls = new ControlContainer({
         enableCopyTool: dataset.enableCopyTool === "true",
     }) as InstanceType<typeof L.Control<ControlContainerOptions>> & {
         updateSettings(options: MapDataSet): void;
@@ -625,7 +629,7 @@ async function initialiseMap(
     return mapItem;
 }
 
-function cleanupMap(mapItem: import("leaflet").Map | undefined) {
+function cleanupMap(mapItem: Map | undefined) {
     mapItem?.clearAllEventListeners();
     mapItem?.remove();
 }
