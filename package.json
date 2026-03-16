@@ -31,7 +31,6 @@
     "sideEffects": false,
     "scripts": {
         "build": "tsup",
-        "prepare": "npm run build",
         "dev": "tsup --watch",
         "lint": "eslint . --max-warnings=0",
         "format": "prettier . --check",
