@@ -8,7 +8,7 @@ import type { FullSlug } from "@quartz-community/bases-page";
 import leafletMapCss from "./styles/leaflet-map.scss";
 import leafletMapScript from "./scripts/leaflet-map.inline";
 import { DEFAULTS } from "./types";
-import type { MarkerData } from "./types";
+import type { MarkerData, LeafletMapPluginOptions } from "./types";
 
 type MarkerWithEntry = MarkerData & {
     name: string;
@@ -36,7 +36,9 @@ const leafletMapRenderer: ViewRenderer = ({
     slug,
     allSlugs,
     linkResolution,
+    options,
 }: ViewRendererProps) => {
+    const pluginOptions = (options ?? {}) as LeafletMapPluginOptions;
     const mapName = getString(view.mapName);
     const rawImage = getString(view.image);
 
@@ -96,7 +98,7 @@ const leafletMapRenderer: ViewRenderer = ({
                 data-zoom-delta={zoomDelta}
                 data-scale={scale}
                 data-unit={unit}
-                data-enable-copy-tool="false"
+                data-enable-copy-tool={pluginOptions.enableCopyTool ?? false}
             >
                 {filteredMarkers.map((marker) => (
                     <div
