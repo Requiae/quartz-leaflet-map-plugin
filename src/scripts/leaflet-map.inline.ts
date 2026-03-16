@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-namespace */
+
 declare const L: typeof import("leaflet");
 
 type SVGProps = Record<string, string | number | undefined> | { class: string[] };
@@ -480,6 +482,7 @@ class CopyControl extends SubControl {
 
 interface ControlContainerOptions {
     enableCopyTool: boolean;
+    position?: "topleft" | undefined;
 }
 
 const DefaultControlContainerOptions: ControlContainerOptions = { enableCopyTool: false };
@@ -605,9 +608,11 @@ async function initialiseMap(
     });
 
     const ControlContainer = getControlContainerClass();
-    const controls = new ControlContainer({
+    const controls = new ControlContainer<ControlContainerOptions>({
         enableCopyTool: dataset.enableCopyTool === "true",
-    }) as InstanceType<typeof L.Control> & { updateSettings(options: MapDataSet): void };
+    }) as InstanceType<typeof L.Control<ControlContainerOptions>> & {
+        updateSettings(options: MapDataSet): void;
+    };
     controls.addTo(mapItem);
     controls.updateSettings(dataset);
 
